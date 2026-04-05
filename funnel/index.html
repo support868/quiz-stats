@@ -256,25 +256,26 @@
 const WORKER_URL = 'https://ga4-proxy.dry-thunder-8d18.workers.dev';
 
 const STEP_META = {
-  Q1_gender:        { label: 'Gender select',       phase: 'quiz' },
-  Q2_age:           { label: 'Age range',            phase: 'quiz' },
-  Q3_goals:         { label: 'Goals',                phase: 'quiz' },
-  Q4_smoking_history:{ label: 'Smoking history',     phase: 'quiz' },
-  Q5_quit_attempts: { label: 'Quit attempts',        phase: 'quiz' },
-  Q6_methods:       { label: 'Methods tried',        phase: 'quiz' },
-  Q7_interstitial:  { label: 'Interstitial',         phase: 'quiz' },
-  Q8_triggers:      { label: 'Triggers',             phase: 'quiz' },
-  Q9_hardest_part:  { label: 'Hardest part',         phase: 'quiz' },
-  Q10_reframe:      { label: 'Reframe',              phase: 'quiz' },
-  Q11_life_impact:  { label: 'Life impact',          phase: 'quiz' },
-  Q12_monthly_spend:{ label: 'Monthly spend',        phase: 'quiz' },
-  Q13_motivation:   { label: 'Motivation',           phase: 'quiz' },
-  Q14_loading:      { label: 'Loading screen',       phase: 'quiz' },
-  R1_diagnosis:     { label: 'R1 — Diagnosis',       phase: 'results' },
-  R2_solution:      { label: 'R2 — Solution',        phase: 'results' },
-  R3_reviews:       { label: 'R3 — Reviews',         phase: 'results' },
-  R4_cta:           { label: 'R4 — CTA screen',      phase: 'results' },
-  R4_cta_click:     { label: 'CTA clicked →',        phase: 'results' },
+  quiz_start:           { label: 'Page load',            phase: 'entry' },
+  Q1_gender:            { label: 'Q1 — Gender answered',  phase: 'quiz' },
+  Q2_age:               { label: 'Q2 — Age answered',     phase: 'quiz' },
+  Q3_goals:             { label: 'Q3 — Goals answered',   phase: 'quiz' },
+  Q4_smoking_history:   { label: 'Q4 — Smoking history',  phase: 'quiz' },
+  Q5_quit_attempts:     { label: 'Q5 — Quit attempts',    phase: 'quiz' },
+  Q6_methods:           { label: 'Q6 — Methods tried',    phase: 'quiz' },
+  Q7_interstitial:      { label: 'Q7 — Interstitial',     phase: 'quiz' },
+  Q8_triggers:          { label: 'Q8 — Triggers',         phase: 'quiz' },
+  Q9_hardest_part:      { label: 'Q9 — Hardest part',     phase: 'quiz' },
+  Q10_reframe:          { label: 'Q10 — Reframe',         phase: 'quiz' },
+  Q11_life_impact:      { label: 'Q11 — Life impact',     phase: 'quiz' },
+  Q12_monthly_spend:    { label: 'Q12 — Monthly spend',   phase: 'quiz' },
+  Q13_motivation:       { label: 'Q13 — Motivation',      phase: 'quiz' },
+  Q14_loading:          { label: 'Q14 — Loading complete', phase: 'quiz' },
+  R1_diagnosis:         { label: 'R1 — Diagnosis',        phase: 'results' },
+  R2_solution:          { label: 'R2 — Solution',         phase: 'results' },
+  R3_reviews:           { label: 'R3 — Reviews',          phase: 'results' },
+  R4_cta:               { label: 'R4 — CTA screen',       phase: 'results' },
+  R4_cta_click:         { label: 'CTA clicked →',         phase: 'results' },
 };
 
 let currentSteps = [];
@@ -310,10 +311,10 @@ async function loadData() {
 }
 
 function rebase(steps) {
-  // Use Q2 as baseline (index 1)
-  const baseline = steps[1]?.count || 1;
-  return steps.slice(1).map((s, i, arr) => {
-    const prev = i > 0 ? arr[i-1].count : baseline;
+  // Use quiz_start (index 0) as baseline — true page load count
+  const baseline = steps[0]?.count || 1;
+  return steps.map((s, i) => {
+    const prev = i > 0 ? steps[i-1].count : baseline;
     const drop = prev - s.count;
     const dropPct = prev > 0 ? Math.round(drop / prev * 100) : 0;
     const retPct = Math.round(s.count / baseline * 100);
@@ -375,7 +376,7 @@ function renderFunnel(steps, top) {
       : 'linear-gradient(90deg, #c8a96e, #e8c98a)';
 
     if (meta.phase !== lastPhase) {
-      const phaseLabel = meta.phase === 'quiz' ? 'Quiz Questions' : 'Results Pages';
+      const phaseLabel = meta.phase === 'entry' ? 'Entry' : meta.phase === 'quiz' ? 'Quiz Questions' : 'Results Pages';
       html += `<div class="funnel-section-header">${phaseLabel}</div>`;
       lastPhase = meta.phase;
     }

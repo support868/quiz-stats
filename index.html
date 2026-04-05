@@ -478,7 +478,7 @@
 // CONFIG — paste your Google Sheet CSV export URL here
 // File > Share > Publish to web > Sheet1 > CSV > Copy link
 // ═══════════════════════════════════════════════════════
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/13Vj3lGx2EnQVkXql-0Pq1X7eDk4jS7FHCL49AZWA_no/edit?usp=sharing';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwpww0BKrCG48AMaGz6lNK30BXZRk7Cy6cLil_p5se6gijWS0M_zX-lCIa54yTmkSiX/exec';
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -494,42 +494,16 @@ let allUtmSources = [];
 // ═══════════════════════════════════════════════════════
 async function fetchData() {
   try {
-    const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+    const res = await fetch(SHEET_URL + '?t=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    allRows = parseCSV(text);
+    allRows = await res.json();
     document.getElementById('metaUpdated').textContent = new Date().toLocaleTimeString();
     buildUTMFilters();
     applyFilters();
     hideLoading();
   } catch (e) {
-    showError('Could not load sheet data. Make sure the sheet is published to web as CSV.\n' + e.message);
+    showError('Could not load sheet data. Make sure the Apps Script is deployed with access set to Anyone.\n' + e.message);
   }
-}
-
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  const headers = parseCSVLine(lines[0]);
-  return lines.slice(1).map(line => {
-    const vals = parseCSVLine(line);
-    const obj = {};
-    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
-    return obj;
-  }).filter(r => r.timestamp);
-}
-
-function parseCSVLine(line) {
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else cur += c;
-  }
-  result.push(cur);
-  return result;
 }
 
 // ═══════════════════════════════════════════════════════

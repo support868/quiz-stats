@@ -3,815 +3,668 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quit Smoking Quiz</title>
-
-<!-- ─── GA4 ─────────────────────────────────────────────────── -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-81CTN0EXMB"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-81CTN0EXMB');
-</script>
-
-<!-- ─── META PIXEL ───────────────────────────────────────────── -->
-<script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '2338204330017730');
-  fbq('track', 'PageView');
-</script>
-<noscript>
-  <img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=2338204330017730&ev=PageView&noscript=1"/>
-</noscript>
-
-<!-- ─── MICROSOFT CLARITY ────────────────────────────────── -->
-<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vs2usyur8r");
-</script>
-
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<title>Quiz Analytics — Nordic Goods</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Nunito', sans-serif; background: #f0f0f0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-  .qs-wrap { background: #ffffff; width: 100%; max-width: 480px; min-height: 100vh; display: flex; flex-direction: column; margin: 0 auto; position: relative; }
-  .qs-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #D8DDD5; background: #fff; flex-shrink: 0; }
-  .qs-back { display: flex; align-items: center; gap: 4px; color: #3A7D44; font-size: 15px; font-weight: 600; cursor: pointer; background: none; border: none; font-family: 'Nunito', sans-serif; padding: 0; }
-  .qs-back svg { width: 16px; height: 16px; }
-  .qs-back:disabled { opacity: 0; pointer-events: none; }
-  .qs-prog-label { font-size: 13px; color: #2D4A3E; font-weight: 600; }
-  .qs-progress { height: 3px; background: #D8DDD5; flex-shrink: 0; }
-  .qs-progress-fill { height: 100%; background: #3A7D44; transition: width 0.4s ease; }
-  .qs-screen { display: none; flex-direction: column; flex: 1; animation: qsFadeIn 0.25s ease; }
-  .qs-screen.active { display: flex; }
-  @keyframes qsFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  .qs-body { flex: 1; padding: 32px 24px 24px; display: flex; flex-direction: column; overflow-y: auto; }
-  .qs-footer { padding: 0 24px 32px; flex-shrink: 0; }
-  .qs-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.8px; color: #3A7D44; text-transform: uppercase; text-align: center; margin-bottom: 6px; }
-  .qs-title { font-size: 24px; font-weight: 800; color: #111; text-align: center; margin-bottom: 8px; line-height: 1.25; }
-  .qs-subtitle { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #2D4A3E; text-transform: uppercase; margin-bottom: 24px; }
-  .qs-options { display: flex; flex-direction: column; gap: 10px; }
-  .qs-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid #D8DDD5; border-radius: 12px; cursor: pointer; background: #fff; transition: all 0.15s ease; user-select: none; }
-  .qs-option:hover { border-color: #3A7D44; background: #F0F7F1; }
-  .qs-option.selected { background: #D4EDCE; border-color: #3A7D44; }
-  .qs-option.center { justify-content: center; }
-  .qs-option.center .qs-opt-label { text-align: center; }
-  .qs-icon-wrap { width: 40px; height: 40px; background: #D4EDCE; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; transition: background 0.15s; }
-  .qs-option.selected .qs-icon-wrap { background: #b8dfc0; }
-  .qs-opt-label { flex: 1; font-size: 15px; font-weight: 700; color: #111; }
-  .qs-option.selected .qs-opt-label { color: #2D4A3E; }
-  .qs-checkbox { width: 22px; height: 22px; border-radius: 5px; border: 2px solid #D8DDD5; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; }
-  .qs-option.selected .qs-checkbox { background: #3A7D44; border-color: #3A7D44; }
-  .qs-checkbox svg { width: 12px; height: 12px; color: #fff; opacity: 0; transition: opacity 0.15s; }
-  .qs-option.selected .qs-checkbox svg { opacity: 1; }
-  .qs-btn { width: 100%; background: #2D4A3E; color: #fff; border: none; border-radius: 50px; padding: 18px; font-size: 17px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; letter-spacing: 0.3px; }
-  .qs-btn:hover { background: #1e3329; }
-  .qs-btn svg { width: 20px; height: 20px; }
-  .qs-btn.bright { background: #3A7D44; }
-  .qs-btn.bright:hover { background: #2D4A3E; }
-  .qs-splash-question { font-size: 36px; font-weight: 900; color: #111; text-align: left; line-height: 1.15; margin-bottom: 12px; }
-  .qs-splash-question span { color: #2D4A3E; }
-  .qs-splash-sub { font-size: 22px; font-weight: 600; color: #444; text-align: left; margin-bottom: 32px; line-height: 1.4; }
-  .qs-gender-prompt { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #2D4A3E; text-transform: uppercase; text-align: left; margin-bottom: 16px; }
-  .qs-gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
-  .qs-gender-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 28px 16px; border: 2px solid #D8DDD5; border-radius: 16px; cursor: pointer; background: #fff; transition: all 0.15s ease; user-select: none; }
-  .qs-gender-tile:hover { border-color: #3A7D44; background: #F0F7F1; }
-  .qs-gender-tile.selected { background: #D4EDCE; border-color: #3A7D44; }
-  .qs-gender-tile .g-icon { font-size: 44px; }
-  .qs-gender-tile .g-label { font-size: 18px; font-weight: 900; color: #111; }
-  .qs-splash-trust { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 16px; font-weight: 700; color: #888; text-align: center; }
-  .qs-splash-trust .trust-stars { font-size: 22px; }
-  .qs-splash-trust span { color: #2D4A3E; font-weight: 900; font-size: 18px; }
-  .qs-info-card { background: #F7FBF7; border: 1.5px solid #D4EDCE; border-radius: 16px; padding: 24px 20px; margin-bottom: 20px; }
-  .qs-stat-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #D4EDCE; font-size: 14px; font-weight: 600; color: #333; line-height: 1.4; }
-  .qs-stat-row:last-child { border-bottom: none; }
-  .qs-highlight-box { background: #2D4A3E; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.5; text-align: center; }
-  .qs-highlight-box span { color: #8FD4A0; }
-  .qs-info-img { width: 100%; height: 180px; border-radius: 16px; margin-bottom: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #111 0%, #2D4A3E 100%); font-size: 50px; flex-shrink: 0; }
-  .qs-info-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .qs-truth-block { background: #F7FBF7; border: 1.5px solid #D4EDCE; border-radius: 16px; padding: 24px 20px; margin-bottom: 20px; font-size: 15px; color: #222; line-height: 1.7; font-weight: 600; }
-  .qs-truth-block p { margin-bottom: 12px; }
-  .qs-truth-block p:last-child { margin-bottom: 0; }
-  .qs-truth-block strong { color: #2D4A3E; font-weight: 800; }
-  .qs-loading { display: flex; flex-direction: column; align-items: center; padding: 40px 24px 32px; flex: 1; }
-  .qs-loading-title { font-size: 22px; font-weight: 900; color: #111; text-align: center; margin-bottom: 32px; line-height: 1.3; }
-  .qs-spinner-wrap { position: relative; width: 120px; height: 120px; margin-bottom: 32px; }
-  .qs-spinner { width: 120px; height: 120px; border-radius: 50%; border: 6px solid #D4EDCE; border-top-color: #3A7D44; animation: qsSpin 1s linear infinite; }
-  @keyframes qsSpin { to { transform: rotate(360deg); } }
-  .qs-spinner-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: #2D4A3E; }
-  .qs-analysis { width: 100%; margin-bottom: 32px; }
-  .qs-step { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; font-weight: 700; color: #bbb; transition: color 0.4s; }
-  .qs-step:last-child { border-bottom: none; }
-  .qs-step.done { color: #2D4A3E; }
-  .qs-step-icon { font-size: 18px; width: 24px; text-align: center; }
-  .qs-sp-box { background: #F7FBF7; border: 1.5px solid #D4EDCE; border-radius: 16px; padding: 20px; width: 100%; text-align: center; margin-top: auto; }
-  .qs-sp-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #2D4A3E; text-transform: uppercase; margin-bottom: 8px; }
-  .qs-sp-stat { font-size: 28px; font-weight: 900; color: #111; margin-bottom: 4px; }
-  .qs-sp-sub { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 10px; }
-  .qs-sp-rating { font-size: 13px; font-weight: 700; color: #2D4A3E; }
-  .r-diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-  .r-diag-card { display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px; border-radius: 14px; min-height: 90px; background: #fff; border: 1.5px solid #D8DDD5; }
-  .r-diag-card .d-lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: #999; text-transform: uppercase; margin-bottom: 8px; }
-  .r-diag-card .d-val { font-size: 17px; font-weight: 900; color: #111; line-height: 1.2; }
-  .d-val.v-serious { color: #a93226; } .d-val.v-moderate { color: #ca6f1e; } .d-val.v-low { color: #2D4A3E; }
-  .d-val.v-ritual { color: #2D4A3E; } .d-val.v-cost { color: #a93226; } .d-val.v-green { color: #2D4A3E; }
-  .d-val.v-yellow { color: #ca6f1e; } .d-val.v-grey { color: #888; }
-  .r-ba-block { border-radius: 16px; overflow: hidden; margin-bottom: 20px; border: 1.5px solid #D8DDD5; }
-  .r-ba-labels { display: grid; grid-template-columns: 1fr 1fr; }
-  .r-ba-lbl { padding: 8px; text-align: center; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-  .r-ba-lbl.before { background: #eee; color: #888; } .r-ba-lbl.after { background: #D4EDCE; color: #2D4A3E; }
-  .r-ba-imgs { display: grid; grid-template-columns: 1fr 1fr; height: 180px; }
-  .r-ba-img { display: flex; align-items: center; justify-content: center; font-size: 48px; overflow: hidden; }
-  .r-ba-img.before { background: #e8e8e8; } .r-ba-img.after { background: #D4EDCE; }
-  .r-ba-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .r-benefit-wrap { margin-bottom: 24px; }
-  .r-benefit-section-lbl { font-size: 13px; font-weight: 800; color: #111; margin-bottom: 10px; }
-  .r-benefit-tick-row { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #888; margin-bottom: 8px; }
-  .r-benefit-track { height: 14px; background: #D8DDD5; border-radius: 7px; overflow: hidden; }
-  .r-benefit-fill { height: 100%; border-radius: 7px; background: linear-gradient(to right, #3A7D44, #8FD4A0); width: 0%; transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1); }
-  .r-benefit-label { text-align: center; margin-top: 8px; font-size: 13px; font-weight: 800; color: #2D4A3E; }
-  .r-product-img { width: 100%; aspect-ratio: 1/1; border-radius: 16px; margin-bottom: 20px; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2D4A3E 0%, #3A7D44 60%, #1e3329 100%); font-size: 64px; }
-  .r-product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .r-mech-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .r-mech-row { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; color: #111; }
-  .r-mech-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-  .r-mech-icon.chk { background: #D4EDCE; }
-  .r-divider-lbl { text-align: center; font-size: 13px; font-weight: 800; color: #2D4A3E; margin: 4px 0 12px; letter-spacing: 0.5px; }
-  .r-zero-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; background: #fdf0ef; border: 2px solid #c0392b; color: #a93226; border-radius: 50px; padding: 13px 20px; font-size: 13px; font-weight: 800; margin-bottom: 20px; letter-spacing: 0.2px; }
-  .r-zero-bar .zb-dot { opacity: 0.4; font-size: 16px; }
-  .r-prod-desc { background: #F7FBF7; border: 1.5px solid #D4EDCE; border-radius: 14px; padding: 18px; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: #333; line-height: 1.7; }
-  .r-prod-desc strong { color: #2D4A3E; font-weight: 800; }
-  .r-social-badge { display: flex; align-items: center; justify-content: center; gap: 12px; background: #F7FBF7; border: 1.5px solid #D4EDCE; border-radius: 12px; padding: 14px; margin-bottom: 20px; }
-  .r-social-badge .sb-stat { font-size: 18px; font-weight: 900; color: #111; }
-  .r-social-badge .sb-sub { font-size: 12px; font-weight: 600; color: #555; }
-  .r-social-badge .sb-div { width: 1px; height: 36px; background: #D4EDCE; }
-  .r-reviews { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
-  .r-review-card { border: 1.5px solid #D8DDD5; border-radius: 14px; padding: 16px; background: #fff; }
-  .r-review-card.featured { background: #F7FBF7; border-color: #3A7D44; }
-  .r-rc-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .r-rc-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-  .r-rc-name { font-size: 15px; font-weight: 800; color: #111; }
-  .r-rc-detail { font-size: 12px; font-weight: 600; color: #888; }
-  .r-rc-stars { font-size: 13px; margin-bottom: 6px; }
-  .r-rc-quote { font-size: 14px; font-weight: 600; color: #333; line-height: 1.6; font-style: italic; }
-  .r-goal-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-  .r-goal-card { display: flex; align-items: flex-start; gap: 14px; background: #F7FBF7; border: 1.5px solid #D4EDCE; border-radius: 14px; padding: 16px; }
-  .r-gc-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
-  .r-gc-headline { font-size: 15px; font-weight: 800; color: #2D4A3E; margin-bottom: 4px; }
-  .r-gc-body { font-size: 13px; font-weight: 600; color: #444; line-height: 1.5; }
-  .r-discount-box { background: linear-gradient(135deg, #2D4A3E 0%, #3A7D44 100%); border-radius: 16px; padding: 24px 20px; margin-bottom: 20px; text-align: center; color: #fff; }
-  .r-discount-box .db-lock { font-size: 28px; margin-bottom: 4px; }
-  .r-discount-box .db-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #8FD4A0; margin-bottom: 6px; }
-  .r-discount-box .db-headline { font-size: 19px; font-weight: 900; margin-bottom: 14px; line-height: 1.2; color: #fff; }
-  .r-discount-code { display: inline-block; background: rgba(255,255,255,.12); border: 2px dashed rgba(255,255,255,.5); border-radius: 10px; padding: 10px 28px; font-size: 24px; font-weight: 900; letter-spacing: 4px; color: #fff; }
-  .r-trust-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-  .r-trust-item { font-size: 13px; font-weight: 700; color: #666; }
+  :root {
+    --bg: #0f0e0c; --surface: #1a1917; --surface2: #242220;
+    --border: #2e2c29; --accent: #c8a96e; --accent2: #e8c98a;
+    --text: #f0ece4; --text-muted: #8a847a; --text-dim: #5a5650;
+    --red: #d4604a; --green: #6aad7e; --yellow: #e8c84a; --blue: #6a9abf;
+    --purple: #9b7fc4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
+
+  /* LOADING */
+  #loadingOverlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; transition: opacity 0.5s ease; }
+  #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-spinner { width: 40px; height: 40px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+  #loadError { display: none; padding: 12px 20px; background: #2a1a18; border: 1px solid var(--red); border-radius: 4px; color: var(--red); font-family: 'DM Mono', monospace; font-size: 12px; margin-top: 16px; max-width: 500px; text-align: center; }
+
+  /* HEADER */
+  header { padding: 40px 48px 28px; border-bottom: 1px solid var(--border); position: relative; z-index: 1; }
+  .header-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3vw, 40px); font-weight: 900; line-height: 1.05; margin-bottom: 10px; }
+  h1 span { color: var(--accent); }
+  .header-meta { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); display: flex; gap: 24px; flex-wrap: wrap; }
+  .header-meta strong { color: var(--accent2); }
+
+  /* FILTERS */
+  .filters { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 48px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  .filter-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-right: 4px; }
+  .preset-btn { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .preset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .preset-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .date-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 10px; border-radius: 3px; }
+  .date-input:focus { outline: none; border-color: var(--accent); }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+  #customDateRow { display: none; gap: 6px; align-items: center; }
+  .apply-btn { padding: 6px 14px; background: var(--accent); border: none; color: var(--bg); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; border-radius: 3px; cursor: pointer; }
+  .version-btn { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .version-btn.active { border-color: var(--blue); color: var(--blue); }
+  .filters-right { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
+
+  /* STAT STRIP */
+  .stat-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); position: relative; z-index: 1; }
+  .stat-tile { background: var(--surface); padding: 18px 22px; }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+  /* LAYOUT */
+  .page-body { display: grid; grid-template-columns: 1fr 380px; min-height: calc(100vh - 200px); position: relative; z-index: 1; }
+
+  /* FUNNEL PANEL */
+  .funnel-panel { padding: 32px 40px; border-right: 1px solid var(--border); }
+  .funnel-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .funnel-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+  .funnel-steps { display: flex; flex-direction: column; }
+  .funnel-step { display: grid; grid-template-columns: 160px 1fr 80px 90px; gap: 12px; align-items: center; padding: 9px 10px; border-bottom: 1px solid #1a1917; cursor: pointer; transition: background 0.15s; border-radius: 3px; border-left: 3px solid transparent; }
+  .funnel-step:hover { background: var(--surface); }
+  .funnel-step.active { background: var(--surface); border-left-color: var(--accent); }
+  .funnel-step.no-data { cursor: default; opacity: 0.7; }
+  .funnel-step.no-data:hover { background: transparent; }
+  .step-name { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .step-name .phase { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 1px; }
+  .step-name .phase.entry { color: var(--text-dim); }
+  .step-name .phase.quiz { color: var(--blue); }
+  .step-name .phase.results { color: var(--purple); }
+  .step-name .clickable-hint { font-size: 9px; color: var(--accent); opacity: 0; transition: opacity 0.2s; }
+  .funnel-step:hover .clickable-hint { opacity: 1; }
+  .funnel-step.active .clickable-hint { opacity: 0; }
+  .step-bar-wrap { position: relative; height: 26px; }
+  .step-bar-bg { position: absolute; inset: 0; background: var(--surface2); border-radius: 2px; }
+  .step-bar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; padding-left: 8px; min-width: 2px; }
+  .step-bar-count { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.9); white-space: nowrap; }
+  .step-retention { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; text-align: right; }
+  .step-dropoff { font-family: 'DM Mono', monospace; font-size: 10px; text-align: right; line-height: 1.4; }
+  .funnel-section-header { grid-column: 1/-1; padding: 14px 10px 5px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 4px; }
+  .funnel-section-header:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+  /* RIGHT PANEL */
+  .right-panel { position: sticky; top: 53px; height: calc(100vh - 53px); overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* DEFAULT RIGHT PANEL — summary */
+  .summary-panel { padding: 28px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .panel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; }
+  .panel-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .completion-ring { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-pct { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--green); text-align: center; }
+  .ring-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-top: 2px; }
+  .dropoff-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .dropoff-item:last-child { border-bottom: none; }
+  .dropoff-rank { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text-dim); width: 20px; flex-shrink: 0; }
+  .dropoff-info { flex: 1; }
+  .dropoff-step { font-size: 12px; font-weight: 600; color: var(--text); }
+  .dropoff-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+  .dropoff-pct { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--red); }
+  .insight-row { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+  .insight-row:last-child { border-bottom: none; }
+  .insight-row strong { color: var(--text); }
+
+  /* RESPONSE DRILL-DOWN PANEL */
+  .drill-panel { padding: 0; display: none; flex-direction: column; }
+  .drill-panel.active { display: flex; }
+  .drill-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .drill-back { background: none; border: none; color: var(--text-muted); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; padding: 0; transition: color 0.2s; }
+  .drill-back:hover { color: var(--accent); }
+  .drill-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--text); flex: 1; }
+  .drill-content { padding: 20px 24px; flex: 1; overflow-y: auto; }
+  .drill-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 20px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .drill-meta span { display: flex; align-items: center; gap: 4px; }
+  .drill-meta strong { color: var(--accent2); }
+
+  /* RESPONSE BAR CHART */
+  .resp-bar-list { display: flex; flex-direction: column; gap: 10px; }
+  .resp-bar-row { display: flex; flex-direction: column; gap: 4px; }
+  .resp-bar-label { font-size: 12px; color: var(--text); font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+  .resp-bar-label-text { flex: 1; margin-right: 8px; }
+  .resp-bar-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .resp-bar-track { height: 20px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .resp-bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; padding-left: 8px; min-width: 2px; }
+  .resp-bar-n { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.8); }
+  .resp-section-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin: 16px 0 8px; }
+  .no-data-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); text-align: center; padding: 32px 0; }
+  .drill-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; }
+  .drill-spinner-inner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+  @media (max-width: 1000px) {
+    .page-body { grid-template-columns: 1fr; }
+    .right-panel { position: static; height: auto; border-top: 1px solid var(--border); }
+    .funnel-panel { border-right: none; padding: 24px 20px; }
+    header, .filters { padding-left: 20px; padding-right: 20px; }
+    .funnel-step { grid-template-columns: 120px 1fr 60px 70px; }
+  }
 </style>
 </head>
 <body>
-<div class="qs-wrap">
 
-  <div class="qs-header">
-    <button class="qs-back" id="qsBackBtn" onclick="qsGoBack()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Back
-    </button>
-    <div class="qs-prog-label" id="qsProgLabel">1 of 14</div>
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading analytics...</div>
+  <div id="loadError"></div>
+</div>
+
+<header>
+  <div class="header-label">Nordic Goods · Quiz Analytics</div>
+  <h1>Funnel &amp; <span>Response Analysis</span></h1>
+  <div class="header-meta">
+    <span>Period <strong id="metaPeriod">Last 30 days</strong></span>
+    <span>Sessions <strong id="metaTop">—</strong></span>
+    <span>Updated <strong id="metaFetched">—</strong></span>
   </div>
-  <div class="qs-progress"><div class="qs-progress-fill" id="qsProgFill" style="width:7.14%"></div></div>
+</header>
 
-  <div class="qs-screen active" id="qs-1">
-    <div class="qs-body" style="padding-top: 36px;">
-      <p class="qs-splash-question">What type of <span>smoker</span> are you?</p>
-      <p class="qs-splash-sub">Take the 2-minute quiz to find your "Addiction Type" and get a personalized quitting plan.</p>
-      <p class="qs-gender-prompt">Select your gender to begin</p>
-      <div class="qs-gender-grid">
-        <div class="qs-gender-tile" onclick="qsGender(this,'Male')"><span class="g-icon">🚹</span><span class="g-label">Male</span></div>
-        <div class="qs-gender-tile" onclick="qsGender(this,'Female')"><span class="g-icon">🚺</span><span class="g-label">Female</span></div>
-      </div>
-      <div class="qs-splash-trust"><span class="trust-stars">⭐⭐⭐⭐⭐</span> &nbsp;<span>32,000+</span> people already quit</div>
-    </div>
+<div class="filters">
+  <span class="filter-label">Period</span>
+  <button class="preset-btn" onclick="setPreset('today',this)">Today</button>
+  <button class="preset-btn" onclick="setPreset('yesterday',this)">Yesterday</button>
+  <button class="preset-btn" onclick="setPreset('7daysAgo',this)">7d</button>
+  <button class="preset-btn active" onclick="setPreset('30daysAgo',this)">30d</button>
+  <button class="preset-btn" onclick="setPreset('allTime',this)">All time</button>
+  <button class="preset-btn" onclick="setPreset('custom',this)">Custom</button>
+  <div id="customDateRow">
+    <input type="date" class="date-input" id="dateFrom">
+    <span style="color:var(--text-dim);font-size:12px">→</span>
+    <input type="date" class="date-input" id="dateTo">
+    <button class="apply-btn" onclick="loadAll()">Apply</button>
   </div>
-
-  <div class="qs-screen" id="qs-2">
-    <div class="qs-body">
-      <h1 class="qs-title">What's your age range?</h1>
-      <p class="qs-subtitle">Select one</p>
-      <div class="qs-options">
-        <div class="qs-option center" onclick="qsSingle(this,'age','25–34')"><span class="qs-opt-label">25–34</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'age','35–44')"><span class="qs-opt-label">35–44</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'age','45–54')"><span class="qs-opt-label">45–54</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'age','55–64')"><span class="qs-opt-label">55–64</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'age','65+')"><span class="qs-opt-label">65+</span></div>
-      </div>
-    </div>
+  <span style="width:1px;height:28px;background:var(--border);flex-shrink:0;"></span>
+  <span class="filter-label">Source</span>
+  <button class="preset-btn" id="fbFilterBtn" onclick="toggleFacebook(this)">Facebook only</button>
+  <div class="filters-right" style="display:flex;gap:6px;align-items:center;">
+    <span class="filter-label">Version</span>
+    <button class="version-btn active" onclick="setVersion('quiz1',this)">Quiz 1</button>
+    <button class="version-btn" onclick="setVersion('quiz2',this)">Quiz 2</button>
+    <span id="updatedBadge" style="margin-left:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);">—</span>
   </div>
+</div>
 
-  <div class="qs-screen" id="qs-3">
-    <div class="qs-body">
-      <h1 class="qs-title">What motivates you most to quit smoking?</h1>
-      <p class="qs-subtitle">Select all that apply</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsMulti(this,'goals','breathe')"><div class="qs-icon-wrap">🫁</div><span class="qs-opt-label">Breathe better and stop coughing</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'goals','family')"><div class="qs-icon-wrap">👨‍👩‍👧</div><span class="qs-opt-label">Be around longer for my family</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'goals','money')"><div class="qs-icon-wrap">💰</div><span class="qs-opt-label">Stop wasting money on cigarettes</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'goals','freedom')"><div class="qs-icon-wrap">🔓</div><span class="qs-opt-label">Break free from addiction</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'goals','smell')"><div class="qs-icon-wrap">🌬️</div><span class="qs-opt-label">Stop smelling like smoke</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'goals','fitness')"><div class="qs-icon-wrap">🏃</div><span class="qs-opt-label">Get my energy and fitness back</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'goals','prove')"><div class="qs-icon-wrap">🧠</div><span class="qs-opt-label">Prove to myself I can actually do this</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-      </div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="qsRequireMulti('goals',4)">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
+<div class="stat-strip">
+  <div class="stat-tile"><div class="stat-val" id="statTop">—</div><div class="stat-label">Sessions</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statQ1">—</div><div class="stat-label">Q1 CTR</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCompleted">—</div><div class="stat-label">Reached results</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCTA">—</div><div class="stat-label">CTA clicks</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCompletion">—</div><div class="stat-label">Completion rate</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statBigDrop">—</div><div class="stat-label">Biggest drop</div></div>
+</div>
 
-  <div class="qs-screen" id="qs-4">
-    <div class="qs-body">
-      <h1 class="qs-title">How long have you been smoking?</h1>
-      <p class="qs-subtitle">Select one</p>
-      <div class="qs-options">
-        <div class="qs-option center" onclick="qsSingle(this,'smokingHistory','Less than 5 years')"><span class="qs-opt-label">Less than 5 years</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'smokingHistory','5–10 years')"><span class="qs-opt-label">5–10 years</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'smokingHistory','10–20 years')"><span class="qs-opt-label">10–20 years</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'smokingHistory','20+ years')"><span class="qs-opt-label">20+ years</span></div>
-      </div>
-    </div>
+<div class="page-body">
+
+  <!-- LEFT: FUNNEL -->
+  <div class="funnel-panel">
+    <div class="funnel-title">Full Funnel</div>
+    <div class="funnel-sub">Click any quiz question to see answer breakdown from responses.</div>
+    <div class="funnel-steps" id="funnelSteps"></div>
   </div>
 
-  <div class="qs-screen" id="qs-5">
-    <div class="qs-body">
-      <h1 class="qs-title">How many times have you tried to quit?</h1>
-      <p class="qs-subtitle">Select one</p>
-      <div class="qs-options">
-        <div class="qs-option center" onclick="qsSingle(this,'quitAttempts','Never seriously tried')"><span class="qs-opt-label">Never seriously tried</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'quitAttempts','1–2 times')"><span class="qs-opt-label">1–2 times</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'quitAttempts','3–5 times')"><span class="qs-opt-label">3–5 times</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'quitAttempts','6–10 times')"><span class="qs-opt-label">6–10 times</span></div>
-        <div class="qs-option center" onclick="qsSingle(this,'quitAttempts',&quot;I've lost count&quot;)"><span class="qs-opt-label">I've lost count</span></div>
-      </div>
-    </div>
-  </div>
+  <!-- RIGHT: PANEL -->
+  <div class="right-panel">
 
-  <div class="qs-screen" id="qs-6">
-    <div class="qs-body">
-      <h1 class="qs-title">Which of these have you tried?</h1>
-      <p class="qs-subtitle">Select all that apply</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','patches')"><div class="qs-icon-wrap">🩹</div><span class="qs-opt-label">Nicotine patches</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','gum')"><div class="qs-icon-wrap">🫧</div><span class="qs-opt-label">Nicotine gum</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','chantix')"><div class="qs-icon-wrap">💊</div><span class="qs-opt-label">Chantix / Wellbutrin</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','vaping')"><div class="qs-icon-wrap">🌬️</div><span class="qs-opt-label">Vaping / e-cigarettes</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','willpower')"><div class="qs-icon-wrap">💪</div><span class="qs-opt-label">Cold turkey / willpower</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','allencarr')"><div class="qs-icon-wrap">📖</div><span class="qs-opt-label">Allen Carr's Easy Way</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'methodsTried','none')"><div class="qs-icon-wrap">❌</div><span class="qs-opt-label">None of the above</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-      </div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="qsRequireMulti('methodsTried',7)">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
-
-  <div class="qs-screen" id="qs-7">
-    <div class="qs-body">
-      <h1 class="qs-title" style="text-align:left;margin-bottom:20px;">Here's what the quit-smoking industry doesn't advertise:</h1>
-      <div class="qs-info-card" id="qs-s7-stats"></div>
-      <div class="qs-highlight-box">Thankfully there's a new quitting method with a <span>73% success rate</span> that thousands are switching to.</div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="qsGoTo(8)">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
-
-  <div class="qs-screen" id="qs-8">
-    <div class="qs-body">
-      <h1 class="qs-title">When do you crave a cigarette the MOST?</h1>
-      <p class="qs-subtitle">Select all that apply</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsMulti(this,'triggers','coffee')"><div class="qs-icon-wrap">☕</div><span class="qs-opt-label">With morning coffee</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'triggers','stress')"><div class="qs-icon-wrap">😤</div><span class="qs-opt-label">When I'm stressed</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'triggers','meal')"><div class="qs-icon-wrap">🍽️</div><span class="qs-opt-label">After a meal</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'triggers','driving')"><div class="qs-icon-wrap">🚗</div><span class="qs-opt-label">While driving</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'triggers','social')"><div class="qs-icon-wrap">🍺</div><span class="qs-opt-label">When drinking socially</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'triggers','breaks')"><div class="qs-icon-wrap">⏰</div><span class="qs-opt-label">On work breaks</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'triggers','bored')"><div class="qs-icon-wrap">📱</div><span class="qs-opt-label">When I'm bored / need something to do with my hands</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-      </div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="qsRequireMulti('triggers',9)">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
-
-  <div class="qs-screen" id="qs-9">
-    <div class="qs-body">
-      <h1 class="qs-title">After you quit (or tried to quit), what was the HARDEST part?</h1>
-      <p class="qs-subtitle">Select one</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsSingle(this,'hardestPart','hands')"><div class="qs-icon-wrap">🤲</div><span class="qs-opt-label">Not knowing what to do with my hands</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'hardestPart','inhale')"><div class="qs-icon-wrap">😮‍💨</div><span class="qs-opt-label">Missing the inhale/exhale</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'hardestPart','breaks')"><div class="qs-icon-wrap">🚪</div><span class="qs-opt-label">Losing my "excuse" for breaks</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'hardestPart','anxiety')"><div class="qs-icon-wrap">😰</div><span class="qs-opt-label">The anxiety without my ritual</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'hardestPart','withdrawal')"><div class="qs-icon-wrap">💊</div><span class="qs-opt-label">The nicotine withdrawal symptoms</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="qs-screen" id="qs-10">
-    <div class="qs-body">
-      <div class="qs-info-img">🧠💭</div>
-      <h1 class="qs-title" style="text-align:left;margin-bottom:20px;">The Truth About Cigarette Addiction No One Told You:</h1>
-      <div class="qs-truth-block">
-        <p>Nicotine leaves your body in <strong>72 hours.</strong></p>
-        <p>But you still crave cigarettes 3 weeks later.</p>
-        <p>Because you're not craving just the nicotine.</p>
-        <p>You're craving the <strong>RITUAL:</strong></p>
-        <p>The inhale. The exhale. The hand-to-mouth motion. The 5-minute break that takes your stress away.</p>
-        <p><strong>Nothing you've tried has replaced that ritual. Until now.</strong></p>
-      </div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="qsGoTo(11)">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
-
-  <div class="qs-screen" id="qs-11">
-    <div class="qs-body">
-      <h1 class="qs-title">How has smoking affected your life?</h1>
-      <p class="qs-subtitle">Select all that apply</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','winded')"><div class="qs-icon-wrap">😮‍💨</div><span class="qs-opt-label">I get winded doing basic things</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','cough')"><div class="qs-icon-wrap">🫁</div><span class="qs-opt-label">I have a persistent cough or chest tightness</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','healthscare')"><div class="qs-icon-wrap">🏥</div><span class="qs-opt-label">I've had a health scare</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','kids')"><div class="qs-icon-wrap">👶</div><span class="qs-opt-label">My kids or grandkids worry about me</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','partner')"><div class="qs-icon-wrap">💑</div><span class="qs-opt-label">My partner or family have asked me to quit</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','hiding')"><div class="qs-icon-wrap">🙈</div><span class="qs-opt-label">I hide my smoking from people I care about</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','control')"><div class="qs-icon-wrap">😔</div><span class="qs-opt-label">I feel like cigarettes control my life</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="qs-option" onclick="qsMulti(this,'lifeImpact','dontthink')"><div class="qs-icon-wrap">🤷</div><span class="qs-opt-label">I try not to think about it</span><div class="qs-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-      </div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="qsRequireMulti('lifeImpact',12)">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
-
-  <div class="qs-screen" id="qs-12">
-    <div class="qs-body">
-      <h1 class="qs-title">How much do you spend on cigarettes per month?</h1>
-      <p class="qs-subtitle">Select one</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsSingle(this,'monthlySpend',150)"><div class="qs-icon-wrap">💵</div><span class="qs-opt-label">$100–200</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'monthlySpend',250)"><div class="qs-icon-wrap">💵</div><span class="qs-opt-label">$200–300</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'monthlySpend',350)"><div class="qs-icon-wrap">💵</div><span class="qs-opt-label">$300–400</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'monthlySpend',450)"><div class="qs-icon-wrap">💰</div><span class="qs-opt-label">$400+</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'monthlySpend',0)"><div class="qs-icon-wrap">🤷</div><span class="qs-opt-label">I don't want to think about it</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="qs-screen" id="qs-13">
-    <div class="qs-body">
-      <h1 class="qs-title">How motivated are you to quit smoking for good?</h1>
-      <p class="qs-subtitle">Select one</p>
-      <div class="qs-options">
-        <div class="qs-option" onclick="qsSingle(this,'motivation',10)"><div class="qs-icon-wrap">🔥</div><span class="qs-opt-label">I want to quit NOW</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'motivation',8)"><div class="qs-icon-wrap">💪</div><span class="qs-opt-label">Very ready</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'motivation',6)"><div class="qs-icon-wrap">👍</div><span class="qs-opt-label">Pretty motivated</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'motivation',4)"><div class="qs-icon-wrap">🤔</div><span class="qs-opt-label">Still figuring it out</span></div>
-        <div class="qs-option" onclick="qsSingle(this,'motivation',2)"><div class="qs-icon-wrap">👀</div><span class="qs-opt-label">Just curious</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="qs-screen" id="qs-14">
-    <div class="qs-loading">
-      <h2 class="qs-loading-title">Building your personalized quitting plan...</h2>
-      <div class="qs-spinner-wrap">
-        <div class="qs-spinner"></div>
-        <div class="qs-spinner-pct" id="qsSpinPct">0%</div>
-      </div>
-      <div class="qs-analysis">
-        <div class="qs-step" id="qsStep1"><span class="qs-step-icon">🔍</span> Analyzing your smoking pattern...</div>
-        <div class="qs-step" id="qsStep2"><span class="qs-step-icon">📊</span> Calculating your health risk level...</div>
-        <div class="qs-step" id="qsStep3"><span class="qs-step-icon">🧬</span> Identifying your ritual addiction type...</div>
-        <div class="qs-step" id="qsStep4"><span class="qs-step-icon">📋</span> Building your Ritual Replacement Plan...</div>
-      </div>
-      <div class="qs-sp-box">
-        <div class="qs-sp-eyebrow">You're not alone</div>
-        <div class="qs-sp-stat">32,000+</div>
-        <div class="qs-sp-sub">smokers have already quit with the<br>Ritual Replacement Method</div>
-        <div class="qs-sp-rating">⭐ 4.7/5 average rating &nbsp;|&nbsp; 73% success rate</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="qs-screen" id="qs-r1">
-    <div class="qs-body">
-      <p class="qs-eyebrow">Your Assessment</p>
-      <h1 class="qs-title">Your Smoking Diagnosis</h1>
-      <div class="r-diag-grid">
-        <div class="r-diag-card"><div class="d-lbl">Health Risk</div><div class="d-val v-serious">⚠️ Serious</div></div>
-        <div class="r-diag-card"><div class="d-lbl">Addiction Type</div><div class="d-val v-ritual" id="r-addType">🔁 Ritual</div></div>
-        <div class="r-diag-card"><div class="d-lbl">Yearly Cost</div><div class="d-val v-cost" id="r-yearlyCost">$3,000/yr</div></div>
-        <div class="r-diag-card"><div class="d-lbl">Quitting Motivation</div><div class="d-val v-green">🔥 Very High</div></div>
-      </div>
-      <div class="r-ba-block">
-        <div class="r-ba-labels"><div class="r-ba-lbl before">Before</div><div class="r-ba-lbl after">After</div></div>
-        <div class="r-ba-imgs">
-          <div class="r-ba-img before"><img src="before.webp" alt="Before" onerror="this.parentElement.innerHTML='🫁'"></div>
-          <div class="r-ba-img after"><img src="after.webp" alt="After" onerror="this.parentElement.innerHTML='💚'"></div>
+    <!-- DEFAULT: summary -->
+    <div class="summary-panel" id="summaryPanel">
+      <div class="panel-card">
+        <div class="panel-title">Overall Completion</div>
+        <div class="completion-ring">
+          <svg class="ring-svg" width="110" height="110" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#2e2c29" stroke-width="10"/>
+            <circle id="completionRing" cx="60" cy="60" r="48" fill="none" stroke="#6aad7e" stroke-width="10"
+              stroke-dasharray="0 301.6" stroke-linecap="round"
+              style="transition:stroke-dasharray 1.2s cubic-bezier(0.16,1,0.3,1)"/>
+          </svg>
+          <div class="ring-pct" id="completionPct">—</div>
+          <div class="ring-sub">Sessions → CTA click</div>
         </div>
       </div>
-      <div class="r-benefit-wrap">
-        <div class="r-benefit-section-lbl">Your Potential Health Benefits:</div>
-        <div class="r-benefit-tick-row"><span>Low</span><span>Medium</span><span>High</span><span>Very High</span></div>
-        <div class="r-benefit-track"><div class="r-benefit-fill" id="rBenefitFill"></div></div>
-        <div class="r-benefit-label" id="rBenefitLabel">Calculating...</div>
+      <div class="panel-card">
+        <div class="panel-title">Top Drop-off Points</div>
+        <div id="topDropoffs"></div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title">Key Observations</div>
+        <div id="keyObservations"></div>
       </div>
     </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="rGoTo(2)">See your best quitting method <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
 
-  <div class="qs-screen" id="qs-r2">
-    <div class="qs-body">
-      <p class="qs-eyebrow">The #1 Method for Your Addiction Type</p>
-      <h1 class="qs-title">The Ritual Replacement Method</h1>
-      <p style="text-align:center;font-size:17px;font-weight:700;color:#2D4A3E;margin-bottom:18px;">Same Ritual. Zero Poison.</p>
-      <div class="r-product-img"><img src="HERO.webp" alt="Nordic Goods Herbal Diffuser" onerror="this.parentElement.innerHTML='🌿'"></div>
-      <div class="r-mech-list">
-        <div class="r-mech-row"><div class="r-mech-icon chk">✓</div> Same hand-to-mouth motion</div>
-        <div class="r-mech-row"><div class="r-mech-icon chk">✓</div> Same inhale and exhale</div>
-        <div class="r-mech-row"><div class="r-mech-icon chk">✓</div> Same breaks, same calm, same satisfaction</div>
+    <!-- DRILL-DOWN: response breakdown -->
+    <div class="drill-panel" id="drillPanel">
+      <div class="drill-header">
+        <button class="drill-back" onclick="closeDrill()">← Back</button>
+        <div class="drill-title" id="drillTitle">—</div>
       </div>
-      <div class="r-divider-lbl">— What you leave behind —</div>
-      <div class="r-zero-bar"><span>✗ Zero Nicotine</span><span class="zb-dot">·</span><span>✗ Zero Tobacco</span><span class="zb-dot">·</span><span>✗ Zero Addiction</span></div>
-      <div class="r-prod-desc">The <strong>Nordic Goods Herbal Diffuser</strong> replicates the ritual of smoking — without the poison. Instead of addictive chemicals, it's infused with natural <strong>mullein herbal</strong> — a lung-healing herb used for over 2,000 years.</div>
-      <div class="r-social-badge">
-        <div><div class="sb-stat">32,000+</div><div class="sb-sub">Smoke-Free Customers</div></div>
-        <div class="sb-div"></div>
-        <div><div class="sb-stat">⭐ 4.7/5</div><div class="sb-sub">Average Rating</div></div>
-        <div class="sb-div"></div>
-        <div><div class="sb-stat">73%</div><div class="sb-sub">Success Rate</div></div>
+      <div class="drill-content">
+        <div class="drill-meta" id="drillMeta"></div>
+        <div id="drillCharts"></div>
       </div>
     </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="rGoTo(3)">See what others are saying <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  </div>
 
-  <div class="qs-screen" id="qs-r3">
-    <div class="qs-body">
-      <p class="qs-eyebrow">32,000+ Smoke-Free Customers</p>
-      <h1 class="qs-title">People Just Like You</h1>
-      <div class="r-reviews" id="rReviewsList"></div>
-    </div>
-    <div class="qs-footer"><button class="qs-btn" onclick="rGoTo(4)">See why it's perfect for you <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>
   </div>
-
-  <div class="qs-screen" id="qs-r4">
-    <div class="qs-body">
-      <p class="qs-eyebrow">Why It's Perfect for You</p>
-      <h1 class="qs-title" id="r4Headline">Your plan is ready.</h1>
-      <div class="r-goal-cards" id="rGoalCards"></div>
-      <div class="r-discount-box">
-        <div class="db-lock">🎁</div>
-        <div class="db-eyebrow">Personalized Discount — Limited Time Only</div>
-        <div class="db-headline">You've completed the quiz — so we're giving you 50% OFF to make quitting as easy as possible.</div>
-        <div style="font-size:13px;font-weight:700;color:#8FD4A0;margin-bottom:12px;letter-spacing:1.5px;">✓ CODE AUTOAPPLIED</div>
-        <div class="r-discount-code">QUIT50</div>
-      </div>
-      <button class="qs-btn bright" onclick="rClaim()">Claim 50% Off Now →</button>
-      <div class="r-trust-row">
-        <div class="r-trust-item">⭐ 4.7/5</div>
-        <div class="r-trust-item">·</div>
-        <div class="r-trust-item">32,000+ Customers</div>
-        <div class="r-trust-item">·</div>
-        <div class="r-trust-item">Free Shipping</div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <script>
-const ans = {
-  gender: null, age: null, goals: [], smokingHistory: null,
-  quitAttempts: null, methodsTried: [], triggers: [],
-  hardestPart: null, lifeImpact: [], monthlySpend: null, motivation: 5
+const WORKER_URL = 'https://ga4-proxy.dry-thunder-8d18.workers.dev';
+const SHEET_URL  = 'https://script.google.com/macros/s/AKfycbyhB_4EHo73PBrC9vMDd3rYPrElzn1xOzUN1dLFNG6XTOHxEl4qJ-ExzqpsbUPTge_K/exec';
+
+// ── STEP META ────────────────────────────────────────────────────
+const STEP_META = {
+  session_start:      { label: 'Sessions started',      phase: 'entry',   sheetKey: null },
+  Q1_gender:          { label: 'Q1 — Gender',           phase: 'quiz',    sheetKey: 'gender',          type: 'single' },
+  Q2_age:             { label: 'Q2 — Age range',        phase: 'quiz',    sheetKey: 'age',             type: 'single' },
+  Q3_goals:           { label: 'Q3 — Goals',            phase: 'quiz',    sheetKey: 'goals',           type: 'multi'  },
+  Q4_smoking_history: { label: 'Q4 — Smoking history',  phase: 'quiz',    sheetKey: 'smoking_history', type: 'single' },
+  Q5_quit_attempts:   { label: 'Q5 — Quit attempts',    phase: 'quiz',    sheetKey: 'quit_attempts',   type: 'single' },
+  Q6_methods:         { label: 'Q6 — Methods tried',    phase: 'quiz',    sheetKey: 'methods_tried',   type: 'multi'  },
+  Q7_interstitial:    { label: 'Q7 — Interstitial',     phase: 'quiz',    sheetKey: null },
+  Q8_triggers:        { label: 'Q8 — Triggers',         phase: 'quiz',    sheetKey: 'triggers',        type: 'multi'  },
+  Q9_hardest_part:    { label: 'Q9 — Hardest part',     phase: 'quiz',    sheetKey: 'hardest_part',    type: 'single' },
+  Q10_reframe:        { label: 'Q10 — Reframe',         phase: 'quiz',    sheetKey: null },
+  Q11_life_impact:    { label: 'Q11 — Life impact',     phase: 'quiz',    sheetKey: 'life_impact',     type: 'multi'  },
+  Q12_monthly_spend:  { label: 'Q12 — Monthly spend',   phase: 'quiz',    sheetKey: 'monthly_spend',   type: 'single' },
+  Q13_motivation:     { label: 'Q13 — Motivation',      phase: 'quiz',    sheetKey: 'motivation',      type: 'single' },
+  Q14_loading:        { label: 'Q14 — Loading complete', phase: 'quiz',   sheetKey: null },
+  R1_diagnosis:       { label: 'R1 — Diagnosis',        phase: 'results', sheetKey: null },
+  R2_solution:        { label: 'R2 — Solution',         phase: 'results', sheetKey: null },
+  R3_reviews:         { label: 'R3 — Reviews',          phase: 'results', sheetKey: null },
+  R4_cta:             { label: 'R4 — CTA screen',       phase: 'results', sheetKey: null },
+  R4_cta_click:       { label: 'CTA clicked →',         phase: 'results', sheetKey: null },
 };
 
-let qsCurrent = 1;
-const QS_TOTAL = 14;
-
-function ga4Event(name, params) { if (typeof gtag !== 'undefined') gtag('event', name, params); }
-function metaCustom(name, params) { if (typeof fbq !== 'undefined') fbq('trackCustom', name, params); }
-function metaStandard(name, params) { if (typeof fbq !== 'undefined') fbq('track', name, params || {}); }
-
-const Q_URL_NAMES = {
-  1: 'Q1_gender', 2: 'Q2_age', 3: 'Q3_goals', 4: 'Q4_smoking_history',
-  5: 'Q5_quit_attempts', 6: 'Q6_methods', 7: 'Q7_interstitial',
-  8: 'Q8_triggers', 9: 'Q9_hardest_part', 10: 'Q10_reframe',
-  11: 'Q11_life_impact', 12: 'Q12_monthly_spend', 13: 'Q13_motivation', 14: 'Q14_loading'
+// Friendly labels for raw values
+const VALUE_LABELS = {
+  gender:          { Male: 'Male', Female: 'Female' },
+  age:             { '25–34':'25–34','35–44':'35–44','45–54':'45–54','55–64':'55–64','65+':'65+' },
+  smoking_history: { 'Less than 5 years':'< 5 years','5–10 years':'5–10 yrs','10–20 years':'10–20 yrs','20+ years':'20+ years' },
+  quit_attempts:   { 'Never seriously tried':'Never','1–2 times':'1–2x','3–5 times':'3–5x','6–10 times':'6–10x',"I've lost count":'Lost count' },
+  hardest_part:    { hands:'Hands/habit', inhale:'Inhale feeling', breaks:'Break ritual', anxiety:'Anxiety', withdrawal:'Withdrawal' },
+  monthly_spend:   { '0':'$0 (social)','150':'$100–200','250':'$200–300','350':'$300–400','450':'$400+' },
+  motivation:      { '2':'Just curious (2)','4':'Figuring it out (4)','6':'Pretty motivated (6)','8':'Very ready (8)','10':'Want to quit NOW (10)' },
+  goals:           { breathe:'Breathe better', family:'Family', money:'Save money', freedom:'Freedom', smell:'Smell/taste', fitness:'Fitness', prove:'Prove it' },
+  methods_tried:   { patches:'Patches', gum:'Gum', chantix:'Chantix', vaping:'Vaping', willpower:'Willpower', allencarr:'Allen Carr', none:'None' },
+  triggers:        { coffee:'Morning coffee', stress:'Stress', meal:'After meals', driving:'Driving', social:'Social', breaks:'Work breaks', bored:'Boredom' },
+  life_impact:     { winded:'Winded', cough:'Cough', healthscare:'Health scare', kids:'Kids/grandkids', partner:'Partner concern', hiding:'Hiding it', control:'Feel controlled', dontthink:'Don\'t think about it' },
 };
 
-function updateURL(step) { history.replaceState(null, '', '?step=' + step); }
-
-// ── EVENT NAMING CONVENTION ──────────────────────────────────────────
-// Qn_xxx fires on ARRIVAL at screen n+1 = question n was just ANSWERED
-// quiz_start  = page load (screen 1 viewed)
-// Q1_gender   = gender answered   (arrival at S2)
-// Q2_age      = age answered      (arrival at S3)
-// ...
-// Q13_motivation = motivation answered (arrival at S14 / loading)
-// Q14_loading    = loading complete, results shown
-// R1_diagnosis   = results screen 1 viewed
-// ────────────────────────────────────────────────────────────────────
-const Q_ARRIVAL_NAMES = {
-  2:  'Q1_gender',
-  3:  'Q2_age',
-  4:  'Q3_goals',
-  5:  'Q4_smoking_history',
-  6:  'Q5_quit_attempts',
-  7:  'Q6_methods',
-  8:  'Q7_interstitial',
-  9:  'Q8_triggers',
-  10: 'Q9_hardest_part',
-  11: 'Q10_reframe',
-  12: 'Q11_life_impact',
-  13: 'Q12_monthly_spend',
-  14: 'Q13_motivation',
-};
-
-function trackQ(eventName) { ga4Event(eventName, {}); }
-
-function qsGetEl(id) { return document.getElementById('qs-' + id); }
-
-function qsGoTo(n) {
-  qsGetEl(qsCurrent).classList.remove('active');
-  qsCurrent = n;
-  const el = qsGetEl(n);
-  el.classList.add('active');
-  el.querySelector('.qs-body')?.scrollTo(0, 0);
-  qsUpdateHeader();
-  const urlName = Q_URL_NAMES[n];
-  if (urlName) updateURL(urlName);
-  const eventName = Q_ARRIVAL_NAMES[n];
-  if (eventName) trackQ(eventName);
-  if (n === 7)  qsPopS7();
-  if (n === 14) qsStartLoading();
-}
-
-function qsGoBack() {
-  if (typeof qsCurrent === 'string') {
-    const n = parseInt(qsCurrent.replace('r', ''));
-    if (n <= 1) return;
-    rGoTo(n - 1);
-  } else {
-    if (qsCurrent <= 1) return;
-    ga4Event('quiz_back', { from_screen: qsCurrent });
-    qsGoTo(qsCurrent - 1);
-  }
-}
-
-function qsUpdateHeader() {
-  const isResult = typeof qsCurrent === 'string';
-  const back = document.getElementById('qsBackBtn');
-  const lbl  = document.getElementById('qsProgLabel');
-  const fill = document.getElementById('qsProgFill');
-  if (isResult) {
-    const n = parseInt(qsCurrent.replace('r', ''));
-    lbl.textContent = 'Results ' + n + ' of 4';
-    fill.style.width = (n / 4 * 100) + '%';
-    back.disabled = (n === 1);
-  } else {
-    lbl.textContent = qsCurrent + ' of ' + QS_TOTAL;
-    fill.style.width = (qsCurrent / QS_TOTAL * 100) + '%';
-    back.disabled = (qsCurrent === 1 || qsCurrent === 14);
-  }
-}
-
-function qsSingle(el, key, value) {
-  el.closest('.qs-options').querySelectorAll('.qs-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  ans[key] = value;
-  setTimeout(() => qsGoTo(qsCurrent + 1), 320);
-}
-
-function qsGender(el, value) {
-  document.querySelectorAll('.qs-gender-tile').forEach(t => t.classList.remove('selected'));
-  el.classList.add('selected');
-  ans.gender = value;
-  setTimeout(() => qsGoTo(2), 320);
-}
-
-function qsMulti(el, key, value) {
-  el.classList.toggle('selected');
-  const arr = ans[key];
-  const idx = arr.indexOf(value);
-  idx === -1 ? arr.push(value) : arr.splice(idx, 1);
-}
-
-function qsRequireMulti(key, next) {
-  if (ans[key].length === 0) { qsShake(); return; }
-  qsGoTo(next);
-}
-
-function qsShake() {
-  const body = qsGetEl(qsCurrent).querySelector('.qs-body');
-  body.style.transition = 'transform 0.08s ease';
-  [6,-6,4,-4,0].forEach((x,i) => setTimeout(() => body.style.transform=`translateX(${x}px)`, i*60));
-  setTimeout(() => { body.style.transform=''; body.style.transition=''; }, 360);
-}
-
-const qsMethodStats = {patches:{label:'Nicotine patches',rate:'7%'},gum:{label:'Nicotine gum',rate:'6%'},chantix:{label:'Chantix / Wellbutrin',rate:'18%'},vaping:{label:'Vaping / e-cigarettes',rate:'12%'},willpower:{label:'Cold turkey / willpower',rate:'5%'},allencarr:{label:"Allen Carr's Easy Way",rate:'15%'}};
-function qsPopS7() {
-  const tried = ans.methodsTried.filter(m => m !== 'none');
-  const keys = tried.length ? tried : Object.keys(qsMethodStats);
-  let html = keys.map(k => { const m=qsMethodStats[k]; if(!m) return ''; return `<div class="qs-stat-row"><span>❌</span><span>${m.label} — <strong>${m.rate} success rate</strong></span></div>`; }).join('');
-  html += `<div class="qs-stat-row" style="border-top:2px solid #D4EDCE;margin-top:4px;padding-top:14px;color:#2D4A3E;font-weight:700;">These methods all make the same mistake. They don't solve the actual root cause of the addiction.</div>`;
-  document.getElementById('qs-s7-stats').innerHTML = html;
-}
-
-function qsStartLoading() {
-  let pct = 0;
-  const pctEl = document.getElementById('qsSpinPct');
-  const iv = setInterval(() => { if(pct>=100){clearInterval(iv);return;} pctEl.textContent=(++pct)+'%'; }, 55);
-  ['qsStep1','qsStep2','qsStep3','qsStep4'].forEach((id,i) => setTimeout(() => document.getElementById(id).classList.add('done'), (i+1)*1400));
-
-  setTimeout(() => {
-    // Q13_motivation fired on arrival at S14 via Q_ARRIVAL_NAMES
-    // Q14_loading fires now = loading complete, results about to show
-    trackQ('Q14_loading');
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const quizData = {
-      timestamp: new Date().toISOString(),
-      gender: ans.gender, age: ans.age,
-      goals: ans.goals.join(','),
-      smoking_history: ans.smokingHistory,
-      quit_attempts: ans.quitAttempts,
-      methods_tried: ans.methodsTried.join(','),
-      triggers: ans.triggers.join(','),
-      hardest_part: ans.hardestPart,
-      life_impact: ans.lifeImpact.join(','),
-      monthly_spend: ans.monthlySpend,
-      motivation: ans.motivation,
-      page_url: window.location.href,
-      referrer: document.referrer || '',
-      utm_source: urlParams.get('utm_source') || '',
-      utm_medium: urlParams.get('utm_medium') || '',
-      utm_campaign: urlParams.get('utm_campaign') || '',
-      utm_content: urlParams.get('utm_content') || '',
-      utm_term: urlParams.get('utm_term') || ''
-    };
-    ga4Event('quiz_complete', {
-      gender: quizData.gender, age: quizData.age,
-      smoking_history: quizData.smoking_history, quit_attempts: quizData.quit_attempts,
-      hardest_part: quizData.hardest_part, monthly_spend: quizData.monthly_spend,
-      motivation: quizData.motivation, goals: quizData.goals,
-      methods_tried: quizData.methods_tried, triggers: quizData.triggers,
-      life_impact: quizData.life_impact
-    });
-    metaStandard('Lead', { content_name: 'quit_smoking_quiz' });
-    metaCustom('QuizComplete', { gender: ans.gender, age: ans.age, motivation: ans.motivation, monthly_spend: ans.monthlySpend });
-    fetch('https://script.google.com/macros/s/AKfycbyhB_4EHo73PBrC9vMDd3rYPrElzn1xOzUN1dLFNG6XTOHxEl4qJ-ExzqpsbUPTge_K/exec', {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(quizData)
-    }).catch(() => {});
-
-    qsGetEl(14).classList.remove('active');
-    qsCurrent = 'r1';
-    qsGetEl('r1').classList.add('active');
-    qsUpdateHeader();
-    updateURL('R1_diagnosis');
-    trackQ('R1_diagnosis');
-    rPopulateDiagnosis();
-    rPopulateReviews();
-    rPopulateGoalCards();
-    rPopR4Headline();
-    setTimeout(rAnimateBenefit, 400);
-  }, 6000);
-}
-
-function rGoTo(n) {
-  qsGetEl(qsCurrent).classList.remove('active');
-  qsCurrent = 'r' + n;
-  const el = qsGetEl('r' + n);
-  el.classList.add('active');
-  el.querySelector('.qs-body')?.scrollTo(0, 0);
-  qsUpdateHeader();
-  updateURL('R' + n + '_' + ['','diagnosis','solution','reviews','cta'][n]);
-  const rNames = { 2: 'R2_solution', 3: 'R3_reviews', 4: 'R4_cta' };
-  if (rNames[n]) trackQ(rNames[n]);
-  if (n === 4) metaStandard('ViewContent', { content_name: 'herbal_diffuser', content_type: 'product' });
-  if (n === 1) setTimeout(rAnimateBenefit, 400);
-}
-
-function rAddType() {
-  const t=ans.triggers||[], h=ans.hardestPart||'';
-  const ritT=['coffee','meal','driving','breaks','bored'], ritH=['hands','inhale','breaks','anxiety'];
-  const rS=t.filter(x=>ritT.includes(x)).length+(ritH.includes(h)?2:0);
-  const cS=(h==='withdrawal'?3:0)+t.filter(x=>['stress','social'].includes(x)).length;
-  if(rS>cS) return '🔁 Ritual'; if(cS>rS) return '⚗️ Chemical'; return '🔁 Ritual + Chemical';
-}
-function rYearlyCost() {
-  const s=ans.monthlySpend; if(!s||s===0) return '$1,200/yr';
-  return '$'+(s*12).toLocaleString()+'/yr';
-}
-function rBenefitPct() {
-  const hMap={'Less than 5 years':1,'5–10 years':2,'10–20 years':3,'20+ years':4};
-  const s=(ans.lifeImpact||[]).length+(hMap[ans.smokingHistory]||2)+(ans.motivation>=7?2:1);
-  return Math.min(92,Math.max(65,60+s*3));
-}
-function rPopulateDiagnosis() {
-  document.getElementById('r-addType').textContent = rAddType();
-  const cEl = document.getElementById('r-yearlyCost'); cEl.textContent = rYearlyCost(); cEl.className = 'd-val v-cost';
-}
-function rAnimateBenefit() {
-  const pct=rBenefitPct();
-  document.getElementById('rBenefitFill').style.width=pct+'%';
-  document.getElementById('rBenefitLabel').textContent = pct>=80?'Very High Benefit Potential 🌿':'High Benefit Potential 💚';
-}
-
-const rAllReviews=[
-  {avatarEmoji:'👨',avatarBg:'#e8f3fb',name:'Mark',age:54,yearsSmoked:28,goals:['freedom'],impacts:['winded'],hardest:['hands'],triggers:[],quote:"I tried patches, gum, Chantix — nothing stuck. This was the first thing that actually gave my hands something to do. I'm 4 months smoke-free."},
-  {avatarEmoji:'👩',avatarBg:'#D4EDCE',name:'Linda',age:61,yearsSmoked:35,goals:['family'],impacts:['kids'],hardest:[],triggers:[],quote:"I didn't think I'd ever hug my grandkids without smelling like smoke. Now I do every single day."},
-  {avatarEmoji:'👨',avatarBg:'#fef3e2',name:'Jason',age:42,yearsSmoked:18,goals:['money'],impacts:['partner'],hardest:[],triggers:[],quote:"I'm saving $280 a month. My wife still can't believe I actually stopped."},
-  {avatarEmoji:'👩',avatarBg:'#fde8e8',name:'Sarah',age:37,yearsSmoked:12,goals:['freedom','smell'],impacts:['hiding'],hardest:[],triggers:[],quote:"I used to hide in the garage to smoke. Now I don't hide anything. That freedom is everything."},
-  {avatarEmoji:'👴',avatarBg:'#e8f0fb',name:'Robert',age:58,yearsSmoked:40,goals:['breathe'],impacts:['healthscare','cough'],hardest:[],triggers:[],quote:"After my COPD diagnosis, my doctor told me to quit immediately. This was the only thing that worked because it gave me the ritual without the damage."},
-  {avatarEmoji:'👩',avatarBg:'#f3e8fb',name:'Diane',age:49,yearsSmoked:22,goals:['prove'],impacts:['control'],hardest:['anxiety'],triggers:[],quote:"I've tried quitting more times than I can count. The difference with this? I never felt like I was giving anything up."},
-  {avatarEmoji:'👨',avatarBg:'#D4EDCE',name:'Carlos',age:45,yearsSmoked:20,goals:['fitness'],impacts:['winded'],hardest:['inhale'],triggers:[],quote:"Three months in and I'm back at the gym. I can actually breathe again. Never thought I'd say that after 20 years."},
-  {avatarEmoji:'👩',avatarBg:'#fef3e2',name:'Tanya',age:39,yearsSmoked:15,goals:['freedom'],impacts:['control'],hardest:['anxiety','breaks'],triggers:[],quote:"I needed cigarettes to deal with stress. This gave me the exact same release, just without the poison. Game changer."},
-  {avatarEmoji:'👩',avatarBg:'#fde8e8',name:'Diane',age:44,yearsSmoked:19,goals:['prove'],impacts:['control'],hardest:['anxiety'],triggers:['stress'],quote:"Every time work got stressful I'd step outside for 19 years. This gave me the same release without the cigarette. Stress actually feels more manageable now."},
-  {avatarEmoji:'👨',avatarBg:'#e8f0fb',name:'Dave',age:51,yearsSmoked:24,goals:['freedom'],impacts:['hiding'],hardest:[],triggers:['coffee'],quote:"Morning coffee and a cigarette was my religion. Now I have my coffee, use this, and the ritual feels just as satisfying."},
-  {avatarEmoji:'👨',avatarBg:'#D4EDCE',name:'Mike',age:47,yearsSmoked:21,goals:['freedom'],impacts:['control'],hardest:[],triggers:['driving'],quote:"I smoked a pack a day just from commuting. Swapped it for this and within two weeks the craving disappeared on my drive."},
-  {avatarEmoji:'👩',avatarBg:'#f3e8fb',name:'Amanda',age:38,yearsSmoked:14,goals:['smell'],impacts:['hiding'],hardest:[],triggers:['social'],quote:"I only smoked socially, or so I told myself. This let me keep the social ritual without the cigarette in my hand."},
-  {avatarEmoji:'👨',avatarBg:'#fef3e2',name:'Brian',age:53,yearsSmoked:30,goals:['freedom'],impacts:['control'],hardest:['hands'],triggers:['bored'],quote:"I wasn't addicted to nicotine. I just needed something to do with my hands. This sounds stupid but that's literally all it fixed and it worked immediately."},
-  {avatarEmoji:'👩',avatarBg:'#fde8e8',name:'Rachel',age:42,yearsSmoked:16,goals:['family'],impacts:['partner','hiding'],hardest:['anxiety'],triggers:[],quote:"I was hiding my smoking from my husband for two years. This helped me stop without having to come clean. The guilt is finally gone."},
-  {avatarEmoji:'👨',avatarBg:'#e8f0fb',name:'Tom',age:56,yearsSmoked:33,goals:['prove'],impacts:['control'],hardest:['withdrawal'],triggers:[],quote:"Every time I quit cold turkey the withdrawals destroyed me by day 3. Having the ritual to fall back on made them manageable for the first time."},
-  {avatarEmoji:'👨',avatarBg:'#D4EDCE',name:'Gary',age:61,yearsSmoked:38,goals:['breathe'],impacts:['healthscare'],hardest:['inhale'],triggers:[],quote:"My doctor found a shadow on my lung scan. I tried everything in a panic. This was the first thing that worked because it didn't feel like quitting."},
-  {avatarEmoji:'👩',avatarBg:'#f3e8fb',name:'Karen',age:48,yearsSmoked:22,goals:['breathe'],impacts:['winded','dontthink'],hardest:['hands'],triggers:[],quote:"I was the type who just didn't think about it. Until I couldn't walk up a flight of stairs without stopping. This made the transition painless."},
-  {avatarEmoji:'👨',avatarBg:'#fef3e2',name:'Steve',age:45,yearsSmoked:20,goals:['money'],impacts:['control'],hardest:[],triggers:['stress'],quote:"I calculated I'd spent over $60,000 on cigarettes in my life. Knowing I'm not throwing money away anymore is almost as satisfying as the quitting itself."},
+const BAR_COLORS = [
+  'linear-gradient(90deg,#c8a96e,#e8c98a)',
+  'linear-gradient(90deg,#6aad7e,#8ecda0)',
+  'linear-gradient(90deg,#6a9abf,#8ab8d8)',
+  'linear-gradient(90deg,#9b7fc4,#b89de0)',
+  'linear-gradient(90deg,#d4604a,#e88070)',
+  'linear-gradient(90deg,#c8a96e80,#e8c98a80)',
+  'linear-gradient(90deg,#6aad7e80,#8ecda080)',
+  'linear-gradient(90deg,#8a847a,#aaa49a)',
 ];
 
-function rScoreReview(r) {
-  let s=0;
-  r.goals.forEach(g=>{if((ans.goals||[]).includes(g)) s+=3;});
-  r.impacts.forEach(i=>{if((ans.lifeImpact||[]).includes(i)) s+=2;});
-  r.hardest.forEach(h=>{if(ans.hardestPart===h) s+=2;});
-  (r.triggers||[]).forEach(t=>{if((ans.triggers||[]).includes(t)) s+=2;});
-  return s;
+let currentSteps = [];
+let sheetRows = [];
+let activePreset = '30daysAgo';
+let activeVersion = 'quiz1';
+let activeDrill = null;
+let facebookOnly = false;
+
+const FB_REFERRERS = ['facebook.com', 'm.facebook.com', 'android-app://m.facebook.com/'];
+
+function isFacebookReferrer(ref) {
+  if (!ref) return false;
+  return FB_REFERRERS.some(fb => ref.includes(fb));
 }
 
-function rPopulateReviews() {
-  const sorted=[...rAllReviews].sort((a,b)=>rScoreReview(b)-rScoreReview(a)).slice(0,4);
-  document.getElementById('rReviewsList').innerHTML=sorted.map((r,i)=>`
-    <div class="r-review-card${i===0?' featured':''}">
-      <div class="r-rc-top">
-        <div class="r-rc-avatar" style="background:${r.avatarBg}">${r.avatarEmoji}</div>
-        <div><div class="r-rc-name">${r.name}, ${r.age}</div><div class="r-rc-detail">Smoked ${r.yearsSmoked} years</div></div>
+function getFilteredRows() {
+  if (!facebookOnly) return sheetRows;
+  return sheetRows.filter(r => isFacebookReferrer(r.referrer));
+}
+
+function toggleFacebook(btn) {
+  facebookOnly = !facebookOnly;
+  btn.classList.toggle('active', facebookOnly);
+  if (activeDrill) {
+    const meta = STEP_META[activeDrill];
+    if (meta) renderDrill(activeDrill, meta);
+  }
+  renderObservations(currentSteps, currentSteps[0]?.count || 0,
+    currentSteps[0]?.count > 0 ? Math.round((currentSteps.find(s=>s.name==='R4_cta_click')?.count||0)/currentSteps[0].count*100) : 0,
+    currentSteps.find(s=>s.name==='R1_diagnosis')?.count > 0 ? Math.round((currentSteps.find(s=>s.name==='R4_cta_click')?.count||0)/currentSteps.find(s=>s.name==='R1_diagnosis').count*100) : 0
+  );
+}
+
+// ── LOAD ALL DATA ────────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  closeDrill();
+
+  let start = activePreset, end = 'today';
+  if (activePreset === 'today')     { start = 'today';        end = 'today'; }
+  else if (activePreset === 'yesterday') { start = 'yesterday'; end = 'yesterday'; }
+  else if (activePreset === 'allTime')   { start = '2024-01-01'; end = 'today'; }
+  else if (activePreset === 'custom') {
+    start = document.getElementById('dateFrom').value || '30daysAgo';
+    end   = document.getElementById('dateTo').value   || 'today';
+  }
+
+  try {
+    const [funnelRes, sheetRes] = await Promise.all([
+      fetch(`${WORKER_URL}?start=${start}&end=${end}`),
+      fetch(`${SHEET_URL}?tab=${activeVersion}`)
+    ]);
+    const [funnelData, rawRows] = await Promise.all([funnelRes.json(), sheetRes.json()]);
+    if (funnelData.error) throw new Error(funnelData.error);
+
+    currentSteps = rebase(funnelData.steps);
+    sheetRows = Array.isArray(rawRows) ? rawRows : [];
+
+    renderAll();
+    document.getElementById('metaFetched').textContent = new Date(funnelData.fetchedAt).toLocaleTimeString();
+    document.getElementById('updatedBadge').textContent = 'Updated ' + new Date(funnelData.fetchedAt).toLocaleTimeString();
+    hideLoading();
+  } catch(e) {
+    showError(e.message);
+  }
+}
+
+function rebase(steps) {
+  const baseline = steps[0]?.count || 1;
+  return steps.map((s, i) => {
+    const prev = i > 0 ? steps[i-1].count : baseline;
+    const drop = prev - s.count;
+    return {
+      ...s,
+      dropoff:      drop,
+      dropoffPct:   prev > 0 ? Math.round(drop / prev * 100) : 0,
+      retentionPct: Math.round(s.count / baseline * 100),
+    };
+  });
+}
+
+// ── RENDER ALL ───────────────────────────────────────────────────
+function renderAll() {
+  const steps = currentSteps;
+  if (!steps.length) return;
+
+  const top      = steps[0].count;
+  const q1       = steps.find(s => s.name === 'Q1_gender')?.count || 0;
+  const r1       = steps.find(s => s.name === 'R1_diagnosis')?.count || 0;
+  const ctaClick = steps.find(s => s.name === 'R4_cta_click')?.count || 0;
+  const completionPct = top > 0 ? Math.round(ctaClick / top * 100) : 0;
+  const ctaRate  = r1 > 0 ? Math.round(ctaClick / r1 * 100) : 0;
+  const byDrop   = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
+
+  // Stat strip
+  document.getElementById('statTop').textContent = top.toLocaleString();
+  document.getElementById('statQ1').textContent  = top > 0 ? Math.round(q1/top*100) + '%' : '—';
+  document.getElementById('statCompleted').textContent = r1.toLocaleString();
+  document.getElementById('statCTA').textContent = ctaClick.toLocaleString();
+  document.getElementById('statCompletion').textContent = completionPct + '%';
+  document.getElementById('statBigDrop').textContent = byDrop[0] ? byDrop[0].dropoffPct + '%' : '—';
+  document.getElementById('metaTop').textContent = top.toLocaleString() + ' sessions';
+
+  // Ring
+  const ringLen = (completionPct / 100) * 301.6;
+  document.getElementById('completionRing').setAttribute('stroke-dasharray', `${ringLen} 301.6`);
+  document.getElementById('completionPct').textContent = completionPct + '%';
+
+  renderFunnel(steps, top);
+  renderTopDropoffs(byDrop.slice(0,5));
+  renderObservations(steps, top, completionPct, ctaRate);
+}
+
+function renderFunnel(steps, top) {
+  const container = document.getElementById('funnelSteps');
+  let html = '', lastPhase = null;
+
+  steps.forEach((step, i) => {
+    const meta = STEP_META[step.name] || { label: step.name, phase: 'quiz', sheetKey: null };
+    const hasData = !!meta.sheetKey;
+    const widthPct = top > 0 ? (step.count / top * 100) : 0;
+    const retColor = step.retentionPct >= 90 ? 'var(--green)' : step.retentionPct >= 70 ? 'var(--accent)' : step.retentionPct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const dropColor = step.dropoffPct <= 2 ? 'var(--text-dim)' : step.dropoffPct <= 5 ? 'var(--accent)' : 'var(--red)';
+    const barColor = meta.phase === 'results' ? 'linear-gradient(90deg,#9b7fc4,#b89de0)' : meta.phase === 'entry' ? 'linear-gradient(90deg,#5a5650,#8a847a)' : 'linear-gradient(90deg,#c8a96e,#e8c98a)';
+
+    if (meta.phase !== lastPhase) {
+      const lbl = meta.phase === 'entry' ? 'Entry' : meta.phase === 'quiz' ? 'Quiz Questions' : 'Results Pages';
+      html += `<div class="funnel-section-header">${lbl}</div>`;
+      lastPhase = meta.phase;
+    }
+
+    html += `<div class="funnel-step${hasData ? '' : ' no-data'}" onclick="${hasData ? `drillInto('${step.name}')` : ''}">
+      <div class="step-name">
+        <span class="phase ${meta.phase}">${meta.phase}</span>
+        ${meta.label}
+        ${hasData ? '<span class="clickable-hint">↗ responses</span>' : ''}
       </div>
-      <div class="r-rc-stars">⭐⭐⭐⭐⭐</div>
-      <div class="r-rc-quote">"${r.quote}"</div>
-    </div>`).join('');
+      <div class="step-bar-wrap">
+        <div class="step-bar-bg"></div>
+        <div class="step-bar-fill" style="width:0%;background:${barColor}" data-target="${widthPct.toFixed(1)}%">
+          <span class="step-bar-count">${step.count.toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="step-retention" style="color:${retColor}">${step.retentionPct}%</div>
+      <div class="step-dropoff" style="color:${dropColor}">
+        ${i > 0 && step.dropoff > 0 ? `↓ ${step.dropoffPct}%<br><span style="font-size:9px;color:var(--text-dim)">${step.dropoff.toLocaleString()} lost</span>` : '<span style="color:var(--text-dim)">—</span>'}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+  setTimeout(() => {
+    container.querySelectorAll('.step-bar-fill').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.dataset.target; }, i * 35);
+    });
+  }, 100);
 }
 
-const rGoalData={
-  breathe:{icon:'🫁',headline:'Relieve cough and support lung health',body:'Natural mullein extract supports your airways and helps heal your lungs — used for over 2,000 years.'},
-  family:{icon:'👨‍👩‍👧',headline:'Be there for the people who matter most',body:'Stop hurting those around you and show them you care by changing for the better.'},
-  money:{icon:'💰',headline:()=>{const y=ans.monthlySpend&&ans.monthlySpend>0?'$'+(ans.monthlySpend*12).toLocaleString():'$1,800';return`Your Yearly Spend: ${y}`;},body:'Save thousands by reclaiming your health. Every month smoke-free is money back in your pocket.'},
-  freedom:{icon:'🔓',headline:'Break free from the chains of addiction',body:'No more planning your day around cigarette breaks. Real freedom — on your terms.'},
-  smell:{icon:'🌬️',headline:'No more hiding. No more cover-ups.',body:'No more perfume cover-ups. No worrying about your kids smelling smoke on you.'},
-  fitness:{icon:'🏃',headline:'Reclaim your health and feel 10 years younger',body:'Your lungs begin healing within hours of your last cigarette.'},
-  prove:{icon:'🧠',headline:'The method that ACTUALLY sticks long term',body:'No more relapsing. No more shame. This addresses the real root cause of your addiction.'}
-};
-
-function rPopulateGoalCards() {
-  const keys=(ans.goals||[]).filter(g=>rGoalData[g]);
-  const use=keys.length?keys:Object.keys(rGoalData).slice(0,3);
-  document.getElementById('rGoalCards').innerHTML=use.map(g=>{
-    const d=rGoalData[g], h=typeof d.headline==='function'?d.headline():d.headline;
-    return`<div class="r-goal-card"><div class="r-gc-icon">${d.icon}</div><div><div class="r-gc-headline">${h}</div><div class="r-gc-body">${d.body}</div></div></div>`;
+function renderTopDropoffs(items) {
+  document.getElementById('topDropoffs').innerHTML = items.map((s, i) => {
+    const meta = STEP_META[s.name] || { label: s.name };
+    return `<div class="dropoff-item">
+      <div class="dropoff-rank">${i+1}</div>
+      <div class="dropoff-info">
+        <div class="dropoff-step">${meta.label}</div>
+        <div class="dropoff-detail">${s.dropoff.toLocaleString()} users lost</div>
+      </div>
+      <div class="dropoff-pct">${s.dropoffPct}%</div>
+    </div>`;
   }).join('');
 }
 
-function rPopR4Headline() {
-  const first=(ans.goals||[]).find(g=>rGoalData[g]);
-  if(first){const d=rGoalData[first],h=typeof d.headline==='function'?d.headline():d.headline;document.getElementById('r4Headline').textContent=h;}
+function renderObservations(steps, top, completionPct, ctaRate) {
+  const obs = [];
+  const byDrop = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
+  const worst = byDrop[0];
+  const r3 = steps.find(s => s.name === 'R3_reviews');
+  const r4 = steps.find(s => s.name === 'R4_cta');
+  const q1 = steps.find(s => s.name === 'Q1_gender');
+  const sessions = steps[0]?.count || 0;
+
+  if (q1 && sessions) {
+    const ctr = Math.round(q1.count / sessions * 100);
+    const color = ctr >= 75 ? 'var(--green)' : ctr >= 50 ? 'var(--accent)' : 'var(--red)';
+    obs.push(`Q1 CTR is <strong style="color:${color}">${ctr}%</strong>${ctr >= 75 ? ' — hitting your 75% target ✓' : ' — below your 75% target'}.`);
+  }
+  if (worst) obs.push(`<strong>${STEP_META[worst.name]?.label}</strong> is the biggest single drop at <strong style="color:var(--red)">${worst.dropoffPct}%</strong> — ${worst.dropoff.toLocaleString()} people lost.`);
+  if (r3 && r4) {
+    const drop = Math.round((r3.count - r4.count) / r3.count * 100);
+    if (drop > 3) obs.push(`<strong>R3→R4</strong> loses ${drop}% — reviews page may need stronger CTA.`);
+  }
+  if (completionPct >= 60) obs.push(`<strong style="color:var(--green)">${completionPct}%</strong> session-to-CTA rate is strong.`);
+  else if (completionPct < 40) obs.push(`<strong style="color:var(--red)">${completionPct}%</strong> session-to-CTA is below target.`);
+  if (ctaRate >= 80) obs.push(`<strong style="color:var(--green)">${ctaRate}%</strong> of people who see the CTA click it.`);
+
+  document.getElementById('keyObservations').innerHTML = obs.map(o => `<div class="insight-row">${o}</div>`).join('') || '<div class="insight-row" style="color:var(--text-dim)">No observations yet.</div>';
 }
 
-function rClaim() {
-  const code = 'QUIT50';
-  trackQ('R4_cta_click');
-  ga4Event('cta_click', { discount_code: code, destination: 'pdp' });
-  metaStandard('CompleteRegistration', { content_name: 'quit_smoking_quiz', status: true });
-  metaCustom('QuizCTAClick', { discount_code: code, gender: ans.gender, motivation: ans.motivation });
-  window.location.href = 'https://nordicgoods.co/pages/herbal-air-diffuser?utm_source=quiz&utm_medium=funnel&utm_campaign=quit_smoking&gender=' + encodeURIComponent(ans.gender||'') + '&motivation=' + ans.motivation;
+// ── DRILL DOWN ───────────────────────────────────────────────────
+function drillInto(stepName) {
+  const meta = STEP_META[stepName];
+  if (!meta?.sheetKey) return;
+
+  activeDrill = stepName;
+
+  // Highlight funnel step
+  document.querySelectorAll('.funnel-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.funnel-step').forEach(s => {
+    if (s.getAttribute('onclick')?.includes(stepName)) s.classList.add('active');
+  });
+
+  // Show drill panel
+  document.getElementById('summaryPanel').style.display = 'none';
+  const drillPanel = document.getElementById('drillPanel');
+  drillPanel.classList.add('active');
+  document.getElementById('drillTitle').textContent = meta.label;
+
+  // Show spinner while computing
+  document.getElementById('drillCharts').innerHTML = '<div class="drill-spinner"><div class="drill-spinner-inner"></div></div>';
+  document.getElementById('drillMeta').innerHTML = '';
+
+  setTimeout(() => renderDrill(stepName, meta), 50);
+}
+
+function closeDrill() {
+  activeDrill = null;
+  document.querySelectorAll('.funnel-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('summaryPanel').style.display = 'flex';
+  document.getElementById('drillPanel').classList.remove('active');
+}
+
+function renderDrill(stepName, meta) {
+  const key = meta.sheetKey;
+  const n = sheetRows.length;
+  const rows = getFilteredRows();
+  const filteredN = rows.length;
+
+  // Meta info
+  const step = currentSteps.find(s => s.name === stepName);
+  document.getElementById('drillMeta').innerHTML = `
+    <span>Responses <strong>${filteredN.toLocaleString()}</strong>${facebookOnly ? ' (Facebook only)' : ''}</span>
+    ${step ? `<span>Reached this step <strong>${step.count.toLocaleString()}</strong></span>` : ''}
+    <span>Version <strong>${activeVersion}</strong></span>
+  `;
+
+  if (filteredN === 0) {
+    document.getElementById('drillCharts').innerHTML = '<div class="no-data-msg">No response data for selected filters.</div>';
+    return;
+  }
+
+  if (meta.type === 'single') {
+    renderSingleChart(key, filteredN, rows);
+  } else if (meta.type === 'multi') {
+    renderMultiChart(key, filteredN, rows);
+  }
+}
+
+function renderSingleChart(key, total, rows) {
+  const counts = {};
+  rows.forEach(row => {
+    const val = String(row[key] ?? '').trim();
+    if (val) counts[val] = (counts[val] || 0) + 1;
+  });
+
+  const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+  const labels = VALUE_LABELS[key] || {};
+
+  const html = `<div class="resp-bar-list">${sorted.map(([val, count], i) => {
+    const pct = Math.round(count / total * 100);
+    const label = labels[val] || val;
+    return `<div class="resp-bar-row">
+      <div class="resp-bar-label">
+        <span class="resp-bar-label-text">${label}</span>
+        <span class="resp-bar-pct">${count.toLocaleString()} · ${pct}%</span>
+      </div>
+      <div class="resp-bar-track">
+        <div class="resp-bar-fill" style="width:0%;background:${BAR_COLORS[i % BAR_COLORS.length]}" data-target="${(count/max*100).toFixed(1)}%">
+          <span class="resp-bar-n"></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+
+  document.getElementById('drillCharts').innerHTML = html;
+  animateDrillBars();
+}
+
+function renderMultiChart(key, totalRespondents, rows) {
+  const counts = {};
+  rows.forEach(row => {
+    const val = String(row[key] ?? '').trim();
+    if (!val) return;
+    val.split(',').forEach(v => {
+      v = v.trim();
+      if (v) counts[v] = (counts[v] || 0) + 1;
+    });
+  });
+
+  const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+  const labels = VALUE_LABELS[key] || {};
+
+  const html = `
+    <div class="resp-section-lbl">% of respondents who selected each option</div>
+    <div class="resp-bar-list">${sorted.map(([val, count], i) => {
+      const pct = Math.round(count / totalRespondents * 100);
+      const label = labels[val] || val;
+      return `<div class="resp-bar-row">
+        <div class="resp-bar-label">
+          <span class="resp-bar-label-text">${label}</span>
+          <span class="resp-bar-pct">${count.toLocaleString()} · ${pct}%</span>
+        </div>
+        <div class="resp-bar-track">
+          <div class="resp-bar-fill" style="width:0%;background:${BAR_COLORS[i % BAR_COLORS.length]}" data-target="${(count/max*100).toFixed(1)}%">
+            <span class="resp-bar-n"></span>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+
+  document.getElementById('drillCharts').innerHTML = html;
+  animateDrillBars();
+}
+
+function animateDrillBars() {
+  setTimeout(() => {
+    document.querySelectorAll('#drillCharts .resp-bar-fill').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.dataset.target; }, i * 50);
+    });
+  }, 50);
+}
+
+// ── CONTROLS ─────────────────────────────────────────────────────
+function setPreset(preset, btn) {
+  activePreset = preset;
+  document.querySelectorAll('.preset-btn:not(#fbFilterBtn):not(.version-btn)').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('customDateRow').style.display = preset === 'custom' ? 'flex' : 'none';
+  const labels = { today:'Today', yesterday:'Yesterday', '7daysAgo':'Last 7 days','30daysAgo':'Last 30 days','allTime':'All time','custom':'Custom range' };
+  document.getElementById('metaPeriod').textContent = labels[preset] || preset;
+  if (preset !== 'custom') loadAll();
+}
+
+function setVersion(version, btn) {
+  activeVersion = version;
+  document.querySelectorAll('.version-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAll();
+}
+
+function hideLoading() {
+  const o = document.getElementById('loadingOverlay');
+  o.classList.add('hidden');
+  setTimeout(() => o.style.display = 'none', 500);
+}
+
+function showError(msg) {
+  document.getElementById('loadError').style.display = 'block';
+  document.getElementById('loadError').textContent = msg;
+  document.querySelector('.loading-text').textContent = 'Failed to load';
+  document.querySelector('.loading-spinner').style.display = 'none';
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
-qsUpdateHeader();
-setTimeout(() => {
-  ga4Event('quiz_start', { screen_name: 'splash_gender' });
-  metaStandard('ViewContent', { content_name: 'quit_smoking_quiz' });
-}, 1000);
+loadAll();
 </script>
 </body>
 </html>

@@ -161,9 +161,11 @@
 
 <div class="filters">
   <span class="filter-label">Period</span>
+  <button class="preset-btn" onclick="setPreset('today',this)">Today</button>
+  <button class="preset-btn" onclick="setPreset('yesterday',this)">Yesterday</button>
   <button class="preset-btn" onclick="setPreset('7daysAgo',this)">7d</button>
   <button class="preset-btn active" onclick="setPreset('30daysAgo',this)">30d</button>
-  <button class="preset-btn" onclick="setPreset('90daysAgo',this)">90d</button>
+  <button class="preset-btn" onclick="setPreset('allTime',this)">All time</button>
   <button class="preset-btn" onclick="setPreset('custom',this)">Custom</button>
   <div id="customDateRow">
     <input type="date" class="date-input" id="dateFrom">
@@ -171,6 +173,9 @@
     <input type="date" class="date-input" id="dateTo">
     <button class="apply-btn" onclick="loadAll()">Apply</button>
   </div>
+  <span style="width:1px;height:28px;background:var(--border);flex-shrink:0;"></span>
+  <span class="filter-label">Source</span>
+  <button class="preset-btn" id="fbFilterBtn" onclick="toggleFacebook(this)">Facebook only</button>
   <div class="filters-right" style="display:flex;gap:6px;align-items:center;">
     <span class="filter-label">Version</span>
     <button class="version-btn active" onclick="setVersion('quiz1',this)">Quiz 1</button>
@@ -299,6 +304,32 @@ let sheetRows = [];
 let activePreset = '30daysAgo';
 let activeVersion = 'quiz1';
 let activeDrill = null;
+let facebookOnly = false;
+
+const FB_REFERRERS = ['facebook.com', 'm.facebook.com', 'android-app://m.facebook.com/'];
+
+function isFacebookReferrer(ref) {
+  if (!ref) return false;
+  return FB_REFERRERS.some(fb => ref.includes(fb));
+}
+
+function getFilteredRows() {
+  if (!facebookOnly) return sheetRows;
+  return sheetRows.filter(r => isFacebookReferrer(r.referrer));
+}
+
+function toggleFacebook(btn) {
+  facebookOnly = !facebookOnly;
+  btn.classList.toggle('active', facebookOnly);
+  if (activeDrill) {
+    const meta = STEP_META[activeDrill];
+    if (meta) renderDrill(activeDrill, meta);
+  }
+  renderObservations(currentSteps, currentSteps[0]?.count || 0,
+    currentSteps[0]?.count > 0 ? Math.round((currentSteps.find(s=>s.name==='R4_cta_click')?.count||0)/currentSteps[0].count*100) : 0,
+    currentSteps.find(s=>s.name==='R1_diagnosis')?.count > 0 ? Math.round((currentSteps.find(s=>s.name==='R4_cta_click')?.count||0)/currentSteps.find(s=>s.name==='R1_diagnosis').count*100) : 0
+  );
+}
 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
 async function loadAll() {
@@ -307,7 +338,10 @@ async function loadAll() {
   closeDrill();
 
   let start = activePreset, end = 'today';
-  if (activePreset === 'custom') {
+  if (activePreset === 'today')     { start = 'today';        end = 'today'; }
+  else if (activePreset === 'yesterday') { start = 'yesterday'; end = 'yesterday'; }
+  else if (activePreset === 'allTime')   { start = '2024-01-01'; end = 'today'; }
+  else if (activePreset === 'custom') {
     start = document.getElementById('dateFrom').value || '30daysAgo';
     end   = document.getElementById('dateTo').value   || 'today';
   }
@@ -499,30 +533,32 @@ function closeDrill() {
 function renderDrill(stepName, meta) {
   const key = meta.sheetKey;
   const n = sheetRows.length;
+  const rows = getFilteredRows();
+  const filteredN = rows.length;
 
   // Meta info
   const step = currentSteps.find(s => s.name === stepName);
   document.getElementById('drillMeta').innerHTML = `
-    <span>Responses <strong>${n.toLocaleString()}</strong></span>
+    <span>Responses <strong>${filteredN.toLocaleString()}</strong>${facebookOnly ? ' (Facebook only)' : ''}</span>
     ${step ? `<span>Reached this step <strong>${step.count.toLocaleString()}</strong></span>` : ''}
     <span>Version <strong>${activeVersion}</strong></span>
   `;
 
-  if (n === 0) {
-    document.getElementById('drillCharts').innerHTML = '<div class="no-data-msg">No response data available yet.</div>';
+  if (filteredN === 0) {
+    document.getElementById('drillCharts').innerHTML = '<div class="no-data-msg">No response data for selected filters.</div>';
     return;
   }
 
   if (meta.type === 'single') {
-    renderSingleChart(key, n);
+    renderSingleChart(key, filteredN, rows);
   } else if (meta.type === 'multi') {
-    renderMultiChart(key, n);
+    renderMultiChart(key, filteredN, rows);
   }
 }
 
-function renderSingleChart(key, total) {
+function renderSingleChart(key, total, rows) {
   const counts = {};
-  sheetRows.forEach(row => {
+  rows.forEach(row => {
     const val = String(row[key] ?? '').trim();
     if (val) counts[val] = (counts[val] || 0) + 1;
   });
@@ -551,9 +587,9 @@ function renderSingleChart(key, total) {
   animateDrillBars();
 }
 
-function renderMultiChart(key, totalRespondents) {
+function renderMultiChart(key, totalRespondents, rows) {
   const counts = {};
-  sheetRows.forEach(row => {
+  rows.forEach(row => {
     const val = String(row[key] ?? '').trim();
     if (!val) return;
     val.split(',').forEach(v => {
@@ -599,10 +635,10 @@ function animateDrillBars() {
 // ── CONTROLS ─────────────────────────────────────────────────────
 function setPreset(preset, btn) {
   activePreset = preset;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.preset-btn:not(#fbFilterBtn):not(.version-btn)').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('customDateRow').style.display = preset === 'custom' ? 'flex' : 'none';
-  const labels = { '7daysAgo':'Last 7 days','30daysAgo':'Last 30 days','90daysAgo':'Last 90 days','custom':'Custom range' };
+  const labels = { today:'Today', yesterday:'Yesterday', '7daysAgo':'Last 7 days','30daysAgo':'Last 30 days','allTime':'All time','custom':'Custom range' };
   document.getElementById('metaPeriod').textContent = labels[preset] || preset;
   if (preset !== 'custom') loadAll();
 }

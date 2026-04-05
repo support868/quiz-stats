@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Funnel — Nordic Goods</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1917;
+    --surface2: #242220;
+    --border: #2e2c29;
+    --accent: #c8a96e;
+    --accent2: #e8c98a;
+    --text: #f0ece4;
+    --text-muted: #8a847a;
+    --text-dim: #5a5650;
+    --red: #d4604a;
+    --green: #6aad7e;
+    --yellow: #e8c84a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
+
+  /* LOADING */
+  #loadingOverlay {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 100; transition: opacity 0.5s ease;
+  }
+  #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-spinner {
+    width: 40px; height: 40px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin-bottom: 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+  #loadError { display: none; padding: 12px 20px; background: #2a1a18; border: 1px solid var(--red); border-radius: 4px; color: var(--red); font-family: 'DM Mono', monospace; font-size: 12px; margin-top: 16px; max-width: 500px; text-align: center; }
+
+  /* HEADER */
+  header { padding: 48px 48px 32px; border-bottom: 1px solid var(--border); position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+  .header-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(24px, 3vw, 44px); font-weight: 900; line-height: 1.05; margin-bottom: 12px; }
+  h1 span { color: var(--accent); }
+  .header-meta { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); display: flex; gap: 24px; flex-wrap: wrap; }
+  .header-meta strong { color: var(--accent2); }
+
+  /* FILTERS */
+  .filters { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 48px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: relative; z-index: 2; }
+  .filter-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-right: 4px; }
+  .preset-btn { padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .preset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .preset-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .date-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 6px 10px; border-radius: 3px; }
+  .date-input:focus { outline: none; border-color: var(--accent); }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+  #customDateRow { display: none; gap: 6px; align-items: center; }
+  .apply-btn { padding: 7px 16px; background: var(--accent); border: none; color: var(--bg); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; border-radius: 3px; cursor: pointer; }
+  .apply-btn:hover { background: var(--accent2); }
+  .divider { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+  .updated-badge { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-left: auto; }
+
+  /* STAT STRIP */
+  .stat-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); position: relative; z-index: 1; }
+  .stat-tile { background: var(--surface); padding: 20px 24px; }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+  /* MAIN */
+  main { padding: 40px 48px; position: relative; z-index: 1; max-width: 1400px; }
+
+  /* FUNNEL */
+  .funnel-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
+
+  .funnel-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .funnel-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 28px; }
+
+  /* FUNNEL STEPS */
+  .funnel-steps { display: flex; flex-direction: column; gap: 0; }
+
+  .funnel-step {
+    display: grid;
+    grid-template-columns: 140px 1fr 90px 90px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e1d1b;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 3px;
+    padding: 10px 8px;
+  }
+  .funnel-step:hover { background: var(--surface); }
+  .funnel-step.highlighted { background: var(--surface); border-left: 3px solid var(--accent); padding-left: 12px; }
+
+  .step-name { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step-name .phase { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .step-name .phase.quiz { color: var(--blue, #6a9abf); }
+  .step-name .phase.results { color: var(--accent); }
+
+  .step-bar-wrap { position: relative; height: 28px; }
+  .step-bar-bg { position: absolute; inset: 0; background: var(--surface2); border-radius: 3px; }
+  .step-bar-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; align-items: center; padding-left: 10px;
+  }
+  .step-bar-count { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.9); white-space: nowrap; }
+
+  .step-retention { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; text-align: right; }
+  .step-dropoff { font-family: 'DM Mono', monospace; font-size: 10px; text-align: right; }
+
+  /* SECTION HEADER inside funnel */
+  .funnel-section-header {
+    grid-column: 1 / -1;
+    padding: 16px 8px 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 4px;
+  }
+  .funnel-section-header:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+  /* SIDE PANEL */
+  .side-panel { position: sticky; top: 20px; }
+  .panel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; margin-bottom: 16px; animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .panel-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+
+  /* TOP DROPOFFS */
+  .dropoff-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .dropoff-item:last-child { border-bottom: none; }
+  .dropoff-rank { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text-dim); width: 24px; flex-shrink: 0; }
+  .dropoff-info { flex: 1; }
+  .dropoff-step { font-size: 13px; font-weight: 600; color: var(--text); }
+  .dropoff-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .dropoff-pct { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--red); }
+
+  /* MINI CHART */
+  .completion-ring { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-label { text-align: center; }
+  .ring-pct { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--green); }
+  .ring-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+  .insight-row { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+  .insight-row:last-child { border-bottom: none; }
+  .insight-row strong { color: var(--text); }
+
+  @media (max-width: 900px) {
+    header, main { padding: 24px 20px; }
+    .filters { padding: 12px 20px; }
+    .funnel-wrap { grid-template-columns: 1fr; }
+    .side-panel { position: static; }
+    .funnel-step { grid-template-columns: 100px 1fr 70px 70px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Fetching funnel data...</div>
+  <div id="loadError"></div>
+</div>
+
+<header>
+  <div>
+    <div class="header-label">Nordic Goods · Funnel Analytics</div>
+    <h1>Quiz Funnel<br><span>Drop-off Analysis</span></h1>
+    <div class="header-meta">
+      <span>Period <strong id="metaPeriod">Last 30 days</strong></span>
+      <span>Top of funnel <strong id="metaTop">—</strong></span>
+      <span>Fetched <strong id="metaFetched">—</strong></span>
+    </div>
+  </div>
+</header>
+
+<div class="filters">
+  <span class="filter-label">Period</span>
+  <button class="preset-btn" onclick="setPreset('7daysAgo', this)">7 days</button>
+  <button class="preset-btn active" onclick="setPreset('30daysAgo', this)">30 days</button>
+  <button class="preset-btn" onclick="setPreset('90daysAgo', this)">90 days</button>
+  <button class="preset-btn" onclick="setPreset('custom', this)">Custom</button>
+  <div id="customDateRow">
+    <input type="date" class="date-input" id="dateFrom">
+    <span style="color:var(--text-dim);font-size:12px">→</span>
+    <input type="date" class="date-input" id="dateTo">
+    <button class="apply-btn" onclick="loadData()">Apply</button>
+  </div>
+  <span class="updated-badge" id="updatedBadge">—</span>
+</div>
+
+<div class="stat-strip">
+  <div class="stat-tile"><div class="stat-val" id="statTop">—</div><div class="stat-label">Entered quiz</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCompleted">—</div><div class="stat-label">Reached results</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCTA">—</div><div class="stat-label">Clicked CTA</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCompletion">—</div><div class="stat-label">Quiz completion rate</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCTARate">—</div><div class="stat-label">CTA click rate</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statBigDrop">—</div><div class="stat-label">Biggest single drop</div></div>
+</div>
+
+<main>
+  <div class="funnel-wrap">
+
+    <!-- LEFT: FUNNEL -->
+    <div>
+      <div class="funnel-title">Full Funnel</div>
+      <div class="funnel-sub">Each bar shows volume relative to quiz entry. Click any step for details.</div>
+      <div class="funnel-steps" id="funnelSteps"></div>
+    </div>
+
+    <!-- RIGHT: SIDE PANEL -->
+    <div class="side-panel">
+
+      <div class="panel-card">
+        <div class="panel-title">Overall Completion</div>
+        <div class="completion-ring">
+          <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#2e2c29" stroke-width="10"/>
+            <circle id="completionRing" cx="60" cy="60" r="48" fill="none" stroke="#6aad7e" stroke-width="10"
+              stroke-dasharray="0 301.6" stroke-linecap="round"
+              style="transition: stroke-dasharray 1.2s cubic-bezier(0.16,1,0.3,1)"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct" id="completionPct">—</div>
+            <div class="ring-sub">Quiz → CTA Click</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-title">Top Drop-off Points</div>
+        <div id="topDropoffs"></div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-title">Key Observations</div>
+        <div id="keyObservations"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+const WORKER_URL = 'https://ga4-proxy.dry-thunder-8d18.workers.dev';
+
+const STEP_META = {
+  Q1_gender:        { label: 'Gender select',       phase: 'quiz' },
+  Q2_age:           { label: 'Age range',            phase: 'quiz' },
+  Q3_goals:         { label: 'Goals',                phase: 'quiz' },
+  Q4_smoking_history:{ label: 'Smoking history',     phase: 'quiz' },
+  Q5_quit_attempts: { label: 'Quit attempts',        phase: 'quiz' },
+  Q6_methods:       { label: 'Methods tried',        phase: 'quiz' },
+  Q7_interstitial:  { label: 'Interstitial',         phase: 'quiz' },
+  Q8_triggers:      { label: 'Triggers',             phase: 'quiz' },
+  Q9_hardest_part:  { label: 'Hardest part',         phase: 'quiz' },
+  Q10_reframe:      { label: 'Reframe',              phase: 'quiz' },
+  Q11_life_impact:  { label: 'Life impact',          phase: 'quiz' },
+  Q12_monthly_spend:{ label: 'Monthly spend',        phase: 'quiz' },
+  Q13_motivation:   { label: 'Motivation',           phase: 'quiz' },
+  Q14_loading:      { label: 'Loading screen',       phase: 'quiz' },
+  R1_diagnosis:     { label: 'R1 — Diagnosis',       phase: 'results' },
+  R2_solution:      { label: 'R2 — Solution',        phase: 'results' },
+  R3_reviews:       { label: 'R3 — Reviews',         phase: 'results' },
+  R4_cta:           { label: 'R4 — CTA screen',      phase: 'results' },
+  R4_cta_click:     { label: 'CTA clicked →',        phase: 'results' },
+};
+
+let currentSteps = [];
+let activePreset = '30daysAgo';
+
+// ── FETCH ────────────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').style.display = 'flex';
+
+  let start = activePreset;
+  let end = 'today';
+
+  if (activePreset === 'custom') {
+    start = document.getElementById('dateFrom').value || '30daysAgo';
+    end = document.getElementById('dateTo').value || 'today';
+  }
+
+  try {
+    const res = await fetch(`${WORKER_URL}?start=${start}&end=${end}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Rebase from Q2 (Q1 is unreliable)
+    currentSteps = rebase(data.steps);
+    render(currentSteps);
+    hideLoading();
+    document.getElementById('metaFetched').textContent = new Date(data.fetchedAt).toLocaleTimeString();
+    document.getElementById('updatedBadge').textContent = 'Updated ' + new Date(data.fetchedAt).toLocaleTimeString();
+  } catch (e) {
+    showError(e.message);
+  }
+}
+
+function rebase(steps) {
+  // Use Q2 as baseline (index 1)
+  const baseline = steps[1]?.count || 1;
+  return steps.slice(1).map((s, i, arr) => {
+    const prev = i > 0 ? arr[i-1].count : baseline;
+    const drop = prev - s.count;
+    const dropPct = prev > 0 ? Math.round(drop / prev * 100) : 0;
+    const retPct = Math.round(s.count / baseline * 100);
+    return { ...s, dropoff: drop, dropoffPct: dropPct, retentionPct: retPct };
+  });
+}
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render(steps) {
+  if (!steps.length) return;
+
+  const top = steps[0].count;
+  const ctaClick = steps.find(s => s.name === 'R4_cta_click')?.count || 0;
+  const r1 = steps.find(s => s.name === 'R1_diagnosis')?.count || 0;
+  const completionPct = top > 0 ? Math.round(ctaClick / top * 100) : 0;
+  const ctaRate = r1 > 0 ? Math.round(ctaClick / r1 * 100) : 0;
+
+  // Sort by dropoff to find biggest
+  const byDrop = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
+  const biggestDrop = byDrop[0];
+
+  // Stat strip
+  document.getElementById('statTop').textContent = top.toLocaleString();
+  document.getElementById('statCompleted').textContent = r1.toLocaleString();
+  document.getElementById('statCTA').textContent = ctaClick.toLocaleString();
+  document.getElementById('statCompletion').textContent = Math.round(r1/top*100) + '%';
+  document.getElementById('statCTARate').textContent = ctaRate + '%';
+  document.getElementById('statBigDrop').textContent = biggestDrop ? biggestDrop.dropoffPct + '%' : '—';
+  document.getElementById('metaTop').textContent = top.toLocaleString() + ' sessions';
+
+  // Completion ring
+  const circum = 301.6;
+  const ringLen = (completionPct / 100) * circum;
+  document.getElementById('completionRing').setAttribute('stroke-dasharray', `${ringLen} ${circum}`);
+  document.getElementById('completionPct').textContent = completionPct + '%';
+
+  // Funnel steps
+  renderFunnel(steps, top);
+
+  // Top dropoffs
+  renderTopDropoffs(byDrop.slice(0, 5));
+
+  // Observations
+  renderObservations(steps, top, completionPct, ctaRate);
+}
+
+function renderFunnel(steps, top) {
+  const container = document.getElementById('funnelSteps');
+  let html = '';
+  let lastPhase = null;
+
+  steps.forEach((step, i) => {
+    const meta = STEP_META[step.name] || { label: step.name, phase: 'quiz' };
+    const widthPct = top > 0 ? (step.count / top * 100) : 0;
+    const retColor = step.retentionPct >= 90 ? 'var(--green)' : step.retentionPct >= 70 ? 'var(--accent)' : step.retentionPct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const dropColor = step.dropoffPct <= 2 ? 'var(--text-dim)' : step.dropoffPct <= 5 ? 'var(--accent)' : 'var(--red)';
+    const barColor = meta.phase === 'results'
+      ? 'linear-gradient(90deg, #9b7fc4, #b89de0)'
+      : 'linear-gradient(90deg, #c8a96e, #e8c98a)';
+
+    if (meta.phase !== lastPhase) {
+      const phaseLabel = meta.phase === 'quiz' ? 'Quiz Questions' : 'Results Pages';
+      html += `<div class="funnel-section-header">${phaseLabel}</div>`;
+      lastPhase = meta.phase;
+    }
+
+    html += `
+      <div class="funnel-step" onclick="highlightStep(this, '${step.name}')">
+        <div class="step-name">
+          <span class="phase ${meta.phase}">${meta.phase}</span>
+          ${meta.label}
+        </div>
+        <div class="step-bar-wrap">
+          <div class="step-bar-bg"></div>
+          <div class="step-bar-fill" style="width:0%;background:${barColor}" data-target="${widthPct.toFixed(1)}%">
+            <span class="step-bar-count">${step.count.toLocaleString()}</span>
+          </div>
+        </div>
+        <div class="step-retention" style="color:${retColor}">${step.retentionPct}%</div>
+        <div class="step-dropoff" style="color:${dropColor}">
+          ${i > 0 && step.dropoff > 0 ? `↓ ${step.dropoffPct}%<br><span style="font-size:9px;color:var(--text-dim)">${step.dropoff.toLocaleString()} lost</span>` : '<span style="color:var(--text-dim)">—</span>'}
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+  setTimeout(() => {
+    container.querySelectorAll('.step-bar-fill').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.dataset.target; }, i * 40);
+    });
+  }, 100);
+}
+
+function renderTopDropoffs(items) {
+  document.getElementById('topDropoffs').innerHTML = items.map((s, i) => {
+    const meta = STEP_META[s.name] || { label: s.name };
+    return `<div class="dropoff-item">
+      <div class="dropoff-rank">${i+1}</div>
+      <div class="dropoff-info">
+        <div class="dropoff-step">${meta.label}</div>
+        <div class="dropoff-detail">${s.dropoff.toLocaleString()} users lost</div>
+      </div>
+      <div class="dropoff-pct">${s.dropoffPct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderObservations(steps, top, completionPct, ctaRate) {
+  const obs = [];
+  const byDrop = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
+  const worst = byDrop[0];
+  const r3 = steps.find(s => s.name === 'R3_reviews');
+  const r4 = steps.find(s => s.name === 'R4_cta');
+  const quizEnd = steps.find(s => s.name === 'Q14_loading');
+  const r1 = steps.find(s => s.name === 'R1_diagnosis');
+
+  if (worst) obs.push(`<strong>${STEP_META[worst.name]?.label}</strong> is your biggest single drop at <strong style="color:var(--red)">${worst.dropoffPct}%</strong> — ${worst.dropoff.toLocaleString()} people lost here.`);
+  if (r3 && r4) {
+    const drop = Math.round((r3.count - r4.count) / r3.count * 100);
+    if (drop > 3) obs.push(`<strong>R3→R4</strong> loses ${drop}% — reviews page may need stronger CTA or social proof.`);
+  }
+  if (quizEnd && r1) {
+    const drop = Math.round((quizEnd.count - r1.count) / quizEnd.count * 100);
+    if (drop > 2) obs.push(`<strong>Loading→Results</strong> loses ${drop}% — possible JS error or slow transition on mobile.`);
+  }
+  if (completionPct >= 60) obs.push(`<strong style="color:var(--green)">${completionPct}% completion</strong> to CTA click is strong — focus on post-click PDP conversion.`);
+  else if (completionPct < 40) obs.push(`<strong style="color:var(--red)">${completionPct}% completion</strong> is below target — quiz length or friction may be the issue.`);
+  if (ctaRate >= 80) obs.push(`<strong style="color:var(--green)">${ctaRate}%</strong> of people who reach the CTA click it — the offer is working.`);
+
+  document.getElementById('keyObservations').innerHTML = obs.map(o => `<div class="insight-row">${o}</div>`).join('') || '<div class="insight-row" style="color:var(--text-dim)">Load data to see observations.</div>';
+}
+
+function highlightStep(el, name) {
+  document.querySelectorAll('.funnel-step').forEach(s => s.classList.remove('highlighted'));
+  el.classList.add('highlighted');
+}
+
+// ── DATE PRESETS ─────────────────────────────────────────────────
+function setPreset(preset, btn) {
+  activePreset = preset;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('customDateRow').style.display = preset === 'custom' ? 'flex' : 'none';
+  const labels = { '7daysAgo': 'Last 7 days', '30daysAgo': 'Last 30 days', '90daysAgo': 'Last 90 days', 'custom': 'Custom range' };
+  document.getElementById('metaPeriod').textContent = labels[preset] || preset;
+  if (preset !== 'custom') loadData();
+}
+
+function hideLoading() {
+  const o = document.getElementById('loadingOverlay');
+  o.classList.add('hidden');
+  setTimeout(() => o.style.display = 'none', 500);
+}
+
+function showError(msg) {
+  const e = document.getElementById('loadError');
+  e.style.display = 'block';
+  e.textContent = msg;
+  document.querySelector('.loading-text').textContent = 'Failed to load';
+  document.querySelector('.loading-spinner').style.display = 'none';
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>

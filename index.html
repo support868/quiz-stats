@@ -3,1042 +3,632 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Response Insights — Nordic Goods</title>
+<title>Quiz Analytics — Nordic Goods</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0e0c;
-    --surface: #1a1917;
-    --surface2: #242220;
-    --border: #2e2c29;
-    --accent: #c8a96e;
-    --accent2: #e8c98a;
-    --text: #f0ece4;
-    --text-muted: #8a847a;
-    --text-dim: #5a5650;
-    --red: #d4604a;
-    --green: #6aad7e;
-    --blue: #6a9abf;
+    --bg: #0f0e0c; --surface: #1a1917; --surface2: #242220;
+    --border: #2e2c29; --accent: #c8a96e; --accent2: #e8c98a;
+    --text: #f0ece4; --text-muted: #8a847a; --text-dim: #5a5650;
+    --red: #d4604a; --green: #6aad7e; --yellow: #e8c84a; --blue: #6a9abf;
     --purple: #9b7fc4;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* LOADING STATE */
-  #loadingOverlay {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 100; transition: opacity 0.5s ease;
-  }
+  /* LOADING */
+  #loadingOverlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; transition: opacity 0.5s ease; }
   #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
-  .loading-spinner {
-    width: 40px; height: 40px; border: 2px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin-bottom: 16px;
-  }
+  .loading-spinner { width: 40px; height: 40px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text {
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted);
-  }
-  #loadError {
-    display: none; padding: 12px 20px; background: #2a1a18;
-    border: 1px solid var(--red); border-radius: 4px; color: var(--red);
-    font-family: 'DM Mono', monospace; font-size: 12px; margin-top: 16px;
-    max-width: 400px; text-align: center;
-  }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+  #loadError { display: none; padding: 12px 20px; background: #2a1a18; border: 1px solid var(--red); border-radius: 4px; color: var(--red); font-family: 'DM Mono', monospace; font-size: 12px; margin-top: 16px; max-width: 500px; text-align: center; }
 
-  header {
-    padding: 48px 48px 32px;
-    border-bottom: 1px solid var(--border);
-    position: relative; z-index: 1;
-  }
-
-  .header-top {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 24px; flex-wrap: wrap;
-  }
-
-  .header-label {
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 12px;
-  }
-
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(28px, 4vw, 52px);
-    font-weight: 900; line-height: 1.05;
-    color: var(--text); margin-bottom: 16px;
-  }
+  /* HEADER */
+  header { padding: 40px 48px 28px; border-bottom: 1px solid var(--border); position: relative; z-index: 1; }
+  .header-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3vw, 40px); font-weight: 900; line-height: 1.05; margin-bottom: 10px; }
   h1 span { color: var(--accent); }
-
-  .header-meta {
-    font-family: 'DM Mono', monospace; font-size: 12px;
-    color: var(--text-muted); display: flex; gap: 32px; flex-wrap: wrap;
-  }
+  .header-meta { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); display: flex; gap: 24px; flex-wrap: wrap; }
   .header-meta strong { color: var(--accent2); }
 
-  /* FILTERS PANEL */
-  .filters-panel {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 16px 48px; position: relative; z-index: 2;
-    display: flex; gap: 24px; flex-wrap: wrap; align-items: center;
-  }
-
-  .filter-group {
-    display: flex; flex-direction: column; gap: 6px;
-  }
-
-  .filter-label {
-    font-family: 'DM Mono', monospace; font-size: 9px;
-    letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim);
-  }
-
-  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-
-  .date-input {
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px;
-    padding: 7px 12px; border-radius: 3px; cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .date-input:focus { outline: none; border-color: var(--accent); }
-  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
-
-  .preset-btn {
-    padding: 6px 12px; background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px;
-    letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px;
-    cursor: pointer; transition: all 0.2s; white-space: nowrap;
-  }
+  /* FILTERS */
+  .filters { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 48px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  .filter-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-right: 4px; }
+  .preset-btn { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
   .preset-btn:hover { color: var(--text); border-color: var(--text-dim); }
   .preset-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
-
-  .utm-btn {
-    padding: 5px 11px; background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px;
-    border-radius: 3px; cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .utm-btn:hover { color: var(--text); }
-  .utm-btn.active { border-color: var(--accent); color: var(--accent); }
-  .utm-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); transition: background 0.2s; }
-  .utm-btn.active .dot { background: var(--accent); }
-
-  .filter-divider {
-    width: 1px; height: 36px; background: var(--border); flex-shrink: 0;
-  }
-
-  .apply-btn {
-    padding: 7px 16px; background: var(--accent); border: none;
-    color: var(--bg); font-family: 'DM Mono', monospace; font-size: 10px;
-    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
-    border-radius: 3px; cursor: pointer; transition: background 0.2s;
-    align-self: flex-end;
-  }
-  .apply-btn:hover { background: var(--accent2); }
-
-  .response-count-badge {
-    padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border);
-    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted);
-    border-radius: 3px; align-self: flex-end;
-  }
-  .response-count-badge strong { color: var(--accent2); }
+  .date-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 10px; border-radius: 3px; }
+  .date-input:focus { outline: none; border-color: var(--accent); }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+  #customDateRow { display: none; gap: 6px; align-items: center; }
+  .apply-btn { padding: 6px 14px; background: var(--accent); border: none; color: var(--bg); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; border-radius: 3px; cursor: pointer; }
+  .version-btn { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .version-btn.active { border-color: var(--blue); color: var(--blue); }
+  .filters-right { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
 
   /* STAT STRIP */
-  .stat-strip {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1px; background: var(--border);
-    border-bottom: 1px solid var(--border); position: relative; z-index: 1;
-  }
-  .stat-tile {
-    background: var(--surface); padding: 24px 28px;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .stat-val {
-    font-family: 'Playfair Display', serif; font-size: 36px;
-    font-weight: 700; color: var(--accent); line-height: 1;
-    transition: all 0.4s ease;
-  }
-  .stat-label {
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px;
-  }
+  .stat-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); position: relative; z-index: 1; }
+  .stat-tile { background: var(--surface); padding: 18px 22px; }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
 
-  /* NAV */
-  .nav {
-    display: flex; gap: 0; border-bottom: 1px solid var(--border);
-    overflow-x: auto; scrollbar-width: none; position: sticky; top: 0;
-    z-index: 10; background: var(--bg);
-  }
-  .nav::-webkit-scrollbar { display: none; }
-  .nav-btn {
-    padding: 14px 22px; font-family: 'DM Mono', monospace; font-size: 11px;
-    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);
-    background: none; border: none; border-bottom: 2px solid transparent;
-    cursor: pointer; transition: all 0.2s; white-space: nowrap;
-  }
-  .nav-btn:hover { color: var(--text); }
-  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  /* LAYOUT */
+  .page-body { display: grid; grid-template-columns: 1fr 380px; min-height: calc(100vh - 200px); position: relative; z-index: 1; }
 
-  /* MAIN */
-  main { padding: 40px 48px; position: relative; z-index: 1; max-width: 1400px; }
-  .section { display: none; }
-  .section.active { display: block; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .section-desc { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 32px; letter-spacing: 0.05em; }
+  /* FUNNEL PANEL */
+  .funnel-panel { padding: 32px 40px; border-right: 1px solid var(--border); }
+  .funnel-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .funnel-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+  .funnel-steps { display: flex; flex-direction: column; }
+  .funnel-step { display: grid; grid-template-columns: 160px 1fr 80px 90px; gap: 12px; align-items: center; padding: 9px 10px; border-bottom: 1px solid #1a1917; cursor: pointer; transition: background 0.15s; border-radius: 3px; border-left: 3px solid transparent; }
+  .funnel-step:hover { background: var(--surface); }
+  .funnel-step.active { background: var(--surface); border-left-color: var(--accent); }
+  .funnel-step.no-data { cursor: default; opacity: 0.7; }
+  .funnel-step.no-data:hover { background: transparent; }
+  .step-name { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .step-name .phase { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 1px; }
+  .step-name .phase.entry { color: var(--text-dim); }
+  .step-name .phase.quiz { color: var(--blue); }
+  .step-name .phase.results { color: var(--purple); }
+  .step-name .clickable-hint { font-size: 9px; color: var(--accent); opacity: 0; transition: opacity 0.2s; }
+  .funnel-step:hover .clickable-hint { opacity: 1; }
+  .funnel-step.active .clickable-hint { opacity: 0; }
+  .step-bar-wrap { position: relative; height: 26px; }
+  .step-bar-bg { position: absolute; inset: 0; background: var(--surface2); border-radius: 2px; }
+  .step-bar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; padding-left: 8px; min-width: 2px; }
+  .step-bar-count { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.9); white-space: nowrap; }
+  .step-retention { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; text-align: right; }
+  .step-dropoff { font-family: 'DM Mono', monospace; font-size: 10px; text-align: right; line-height: 1.4; }
+  .funnel-section-header { grid-column: 1/-1; padding: 14px 10px 5px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 4px; }
+  .funnel-section-header:first-child { border-top: none; margin-top: 0; padding-top: 0; }
 
-  /* CHART CARDS */
-  .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; margin-bottom: 20px; }
-  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; animation: fadeUp 0.4s ease both; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  .chart-card-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
-  .chart-card-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+  /* RIGHT PANEL */
+  .right-panel { position: sticky; top: 53px; height: calc(100vh - 53px); overflow-y: auto; display: flex; flex-direction: column; }
 
-  /* BAR ROWS */
-  .bar-list { display: flex; flex-direction: column; gap: 10px; }
-  .bar-row { display: grid; grid-template-columns: 140px 1fr 80px; gap: 10px; align-items: center; font-size: 12px; }
-  .bar-label { font-family: 'DM Sans', sans-serif; color: var(--text); text-align: right; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bar-track { background: var(--bg); border-radius: 2px; height: 22px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); min-width: 2px; }
-  .bar-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); text-align: right; }
+  /* DEFAULT RIGHT PANEL — summary */
+  .summary-panel { padding: 28px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .panel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; }
+  .panel-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .completion-ring { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-pct { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--green); text-align: center; }
+  .ring-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-top: 2px; }
+  .dropoff-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .dropoff-item:last-child { border-bottom: none; }
+  .dropoff-rank { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text-dim); width: 20px; flex-shrink: 0; }
+  .dropoff-info { flex: 1; }
+  .dropoff-step { font-size: 12px; font-weight: 600; color: var(--text); }
+  .dropoff-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+  .dropoff-pct { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--red); }
+  .insight-row { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+  .insight-row:last-child { border-bottom: none; }
+  .insight-row strong { color: var(--text); }
 
-  /* DONUT */
-  .donut-wrap { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
-  .donut-svg { flex-shrink: 0; }
-  .donut-legend { display: flex; flex-direction: column; gap: 10px; flex: 1; }
-  .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .legend-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-left: auto; }
+  /* RESPONSE DRILL-DOWN PANEL */
+  .drill-panel { padding: 0; display: none; flex-direction: column; }
+  .drill-panel.active { display: flex; }
+  .drill-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .drill-back { background: none; border: none; color: var(--text-muted); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; padding: 0; transition: color 0.2s; }
+  .drill-back:hover { color: var(--accent); }
+  .drill-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--text); flex: 1; }
+  .drill-content { padding: 20px 24px; flex: 1; overflow-y: auto; }
+  .drill-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 20px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .drill-meta span { display: flex; align-items: center; gap: 4px; }
+  .drill-meta strong { color: var(--accent2); }
 
-  /* MOTIVATION GRID */
-  .motivation-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
-  .mot-block { background: var(--bg); border-radius: 4px; padding: 16px 12px; text-align: center; border: 1px solid var(--border); }
-  .mot-score { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; line-height: 1; }
-  .mot-n { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
-  .mot-pct { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  /* RESPONSE BAR CHART */
+  .resp-bar-list { display: flex; flex-direction: column; gap: 10px; }
+  .resp-bar-row { display: flex; flex-direction: column; gap: 4px; }
+  .resp-bar-label { font-size: 12px; color: var(--text); font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+  .resp-bar-label-text { flex: 1; margin-right: 8px; }
+  .resp-bar-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .resp-bar-track { height: 20px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .resp-bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; padding-left: 8px; min-width: 2px; }
+  .resp-bar-n { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.8); }
+  .resp-section-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin: 16px 0 8px; }
+  .no-data-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); text-align: center; padding: 32px 0; }
+  .drill-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; }
+  .drill-spinner-inner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-  /* INSIGHT CARDS */
-  .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 32px; }
-  .insight-card { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 4px; padding: 20px; animation: fadeUp 0.4s ease both; }
-  .insight-card.red { border-left-color: var(--red); }
-  .insight-card.green { border-left-color: var(--green); }
-  .insight-card.blue { border-left-color: var(--blue); }
-  .insight-card.purple { border-left-color: var(--purple); }
-  .insight-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
-  .insight-headline { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; line-height: 1.3; }
-  .insight-body { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
-  .insight-stat { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--accent); margin-top: 12px; }
-
-  /* NO DATA */
-  .no-data { text-align: center; padding: 40px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-dim); }
-
-  @media (max-width: 700px) {
-    header, main { padding: 24px 20px; }
-    .filters-panel { padding: 16px 20px; }
-    .bar-row { grid-template-columns: 90px 1fr 60px; }
-    .chart-grid { grid-template-columns: 1fr; }
+  @media (max-width: 1000px) {
+    .page-body { grid-template-columns: 1fr; }
+    .right-panel { position: static; height: auto; border-top: 1px solid var(--border); }
+    .funnel-panel { border-right: none; padding: 24px 20px; }
+    header, .filters { padding-left: 20px; padding-right: 20px; }
+    .funnel-step { grid-template-columns: 120px 1fr 60px 70px; }
   }
 </style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
 <div id="loadingOverlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text">Fetching quiz data...</div>
+  <div class="loading-text">Loading analytics...</div>
   <div id="loadError"></div>
 </div>
 
 <header>
-  <div class="header-top">
-    <div>
-      <div class="header-label">Nordic Goods · Quiz Analytics</div>
-      <h1>Smoking Cessation<br><span>Audience Intelligence</span></h1>
-      <div class="header-meta" id="headerMeta">
-        <span>Total Responses <strong id="metaTotal">—</strong></span>
-        <span>Period <strong id="metaPeriod">—</strong></span>
-        <span>Last Updated <strong id="metaUpdated">—</strong></span>
-      </div>
-    </div>
+  <div class="header-label">Nordic Goods · Quiz Analytics</div>
+  <h1>Funnel &amp; <span>Response Analysis</span></h1>
+  <div class="header-meta">
+    <span>Period <strong id="metaPeriod">Last 30 days</strong></span>
+    <span>Sessions <strong id="metaTop">—</strong></span>
+    <span>Updated <strong id="metaFetched">—</strong></span>
   </div>
 </header>
 
-<!-- FILTERS -->
-<div class="filters-panel">
-  <div class="filter-group">
-    <div class="filter-label">Date Range</div>
-    <div class="filter-row">
-      <button class="preset-btn active" onclick="setPreset('all', this)">All time</button>
-      <button class="preset-btn" onclick="setPreset('7d', this)">7 days</button>
-      <button class="preset-btn" onclick="setPreset('30d', this)">30 days</button>
-      <button class="preset-btn" onclick="setPreset('custom', this)">Custom</button>
-    </div>
-    <div class="filter-row" id="customDateRow" style="display:none;margin-top:6px;">
-      <input type="date" class="date-input" id="dateFrom">
-      <span style="color:var(--text-dim);font-size:12px">→</span>
-      <input type="date" class="date-input" id="dateTo">
-    </div>
+<div class="filters">
+  <span class="filter-label">Period</span>
+  <button class="preset-btn" onclick="setPreset('7daysAgo',this)">7d</button>
+  <button class="preset-btn active" onclick="setPreset('30daysAgo',this)">30d</button>
+  <button class="preset-btn" onclick="setPreset('90daysAgo',this)">90d</button>
+  <button class="preset-btn" onclick="setPreset('custom',this)">Custom</button>
+  <div id="customDateRow">
+    <input type="date" class="date-input" id="dateFrom">
+    <span style="color:var(--text-dim);font-size:12px">→</span>
+    <input type="date" class="date-input" id="dateTo">
+    <button class="apply-btn" onclick="loadAll()">Apply</button>
   </div>
-
-  <div class="filter-divider"></div>
-
-  <div class="filter-group">
-    <div class="filter-label">UTM Source</div>
-    <div class="filter-row" id="utmFilters">
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)">Loading sources...</span>
-    </div>
+  <div class="filters-right" style="display:flex;gap:6px;align-items:center;">
+    <span class="filter-label">Version</span>
+    <button class="version-btn active" onclick="setVersion('quiz1',this)">Quiz 1</button>
+    <button class="version-btn" onclick="setVersion('quiz2',this)">Quiz 2</button>
+    <span id="updatedBadge" style="margin-left:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);">—</span>
   </div>
-
-  <div class="filter-divider"></div>
-
-  <button class="apply-btn" onclick="applyFilters()">Apply</button>
-  <div class="response-count-badge">Showing <strong id="filteredCount">—</strong> responses</div>
 </div>
 
-<!-- STAT STRIP -->
 <div class="stat-strip">
-  <div class="stat-tile"><div class="stat-val" id="statFemale">—</div><div class="stat-label">Female respondents</div></div>
-  <div class="stat-tile"><div class="stat-val" id="statAge">—</div><div class="stat-label">Age 65+</div></div>
-  <div class="stat-tile"><div class="stat-val" id="statLongterm">—</div><div class="stat-label">20+ year smokers</div></div>
-  <div class="stat-tile"><div class="stat-val" id="statMotivation">—</div><div class="stat-label">Avg motivation /10</div></div>
-  <div class="stat-tile"><div class="stat-val" id="statSpend">—</div><div class="stat-label">Avg monthly spend</div></div>
-  <div class="stat-tile"><div class="stat-val" id="statLostCount">—</div><div class="stat-label">Lost count of attempts</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statTop">—</div><div class="stat-label">Sessions</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statQ1">—</div><div class="stat-label">Q1 CTR</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCompleted">—</div><div class="stat-label">Reached results</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCTA">—</div><div class="stat-label">CTA clicks</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statCompletion">—</div><div class="stat-label">Completion rate</div></div>
+  <div class="stat-tile"><div class="stat-val" id="statBigDrop">—</div><div class="stat-label">Biggest drop</div></div>
 </div>
 
-<nav class="nav">
-  <button class="nav-btn active" onclick="showSection('demographics', this)">Demographics</button>
-  <button class="nav-btn" onclick="showSection('goals', this)">Goals & Motivators</button>
-  <button class="nav-btn" onclick="showSection('history', this)">Quit History</button>
-  <button class="nav-btn" onclick="showSection('triggers', this)">Triggers</button>
-  <button class="nav-btn" onclick="showSection('struggles', this)">Struggles</button>
-  <button class="nav-btn" onclick="showSection('spend', this)">Spend & Motivation</button>
-  <button class="nav-btn" onclick="showSection('insights', this)">Key Insights</button>
-</nav>
+<div class="page-body">
 
-<main>
-
-<!-- DEMOGRAPHICS -->
-<div class="section active" id="demographics">
-  <div class="section-title">Who is your audience?</div>
-  <div class="section-desc">Gender and age distribution</div>
-  <div class="chart-grid">
-    <div class="chart-card">
-      <div class="chart-card-title">Gender</div>
-      <div class="chart-card-sub">Split across filtered respondents</div>
-      <div class="donut-wrap">
-        <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120" id="genderDonut">
-          <circle cx="60" cy="60" r="48" fill="none" stroke="#2e2c29" stroke-width="20"/>
-          <circle id="donutFemale" cx="60" cy="60" r="48" fill="none" stroke="#c8a96e" stroke-width="20" stroke-dasharray="0 301.6" stroke-dashoffset="75.4" transform="rotate(-90 60 60)" style="transition:stroke-dasharray 0.8s ease"/>
-          <circle id="donutMale" cx="60" cy="60" r="48" fill="none" stroke="#6a9abf" stroke-width="20" stroke-dasharray="0 301.6" stroke-dashoffset="75.4" transform="rotate(-90 60 60)" style="transition:stroke-dasharray 0.8s ease"/>
-          <text id="donutPct" x="60" y="56" text-anchor="middle" font-family="Playfair Display" font-size="18" font-weight="700" fill="#f0ece4">—</text>
-          <text x="60" y="70" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#8a847a">FEMALE</text>
-        </svg>
-        <div class="donut-legend" id="genderLegend"></div>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">Age Group</div>
-      <div class="chart-card-sub">Respondents by age range</div>
-      <div class="bar-list" id="ageChart"></div>
-    </div>
+  <!-- LEFT: FUNNEL -->
+  <div class="funnel-panel">
+    <div class="funnel-title">Full Funnel</div>
+    <div class="funnel-sub">Click any quiz question to see answer breakdown from responses.</div>
+    <div class="funnel-steps" id="funnelSteps"></div>
   </div>
-</div>
 
-<!-- GOALS -->
-<div class="section" id="goals">
-  <div class="section-title">What do they want?</div>
-  <div class="section-desc">Multi-select — % of respondents who chose each goal</div>
-  <div class="chart-grid">
-    <div class="chart-card" style="grid-column:1/-1">
-      <div class="chart-card-title">Quit Goals (multi-select)</div>
-      <div class="chart-card-sub">All goals ranked by selection frequency</div>
-      <div class="bar-list" id="goalsChart"></div>
-    </div>
-  </div>
-</div>
+  <!-- RIGHT: PANEL -->
+  <div class="right-panel">
 
-<!-- HISTORY -->
-<div class="section" id="history">
-  <div class="section-title">Quit history</div>
-  <div class="section-desc">Smoking duration and previous quit attempts</div>
-  <div class="chart-grid">
-    <div class="chart-card">
-      <div class="chart-card-title">Smoking History</div>
-      <div class="chart-card-sub">Years as a smoker</div>
-      <div class="bar-list" id="smokingHistoryChart"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">Previous Quit Attempts</div>
-      <div class="chart-card-sub">How many times they've tried to quit</div>
-      <div class="bar-list" id="quitAttemptsChart"></div>
-    </div>
-    <div class="chart-card" style="grid-column:1/-1">
-      <div class="chart-card-title">Methods Previously Tried (multi-select)</div>
-      <div class="chart-card-sub">What they've already attempted</div>
-      <div class="bar-list" id="methodsChart"></div>
-    </div>
-  </div>
-</div>
-
-<!-- TRIGGERS -->
-<div class="section" id="triggers">
-  <div class="section-title">What triggers cravings?</div>
-  <div class="section-desc">Multi-select — situations that make them want to smoke</div>
-  <div class="chart-grid">
-    <div class="chart-card" style="grid-column:1/-1">
-      <div class="chart-card-title">Craving Triggers (multi-select)</div>
-      <div class="chart-card-sub">Ranked by selection frequency</div>
-      <div class="bar-list" id="triggersChart"></div>
-    </div>
-  </div>
-</div>
-
-<!-- STRUGGLES -->
-<div class="section" id="struggles">
-  <div class="section-title">What makes it hard?</div>
-  <div class="section-desc">Hardest parts of quitting & life impact concerns</div>
-  <div class="chart-grid">
-    <div class="chart-card">
-      <div class="chart-card-title">Hardest Part of Quitting</div>
-      <div class="chart-card-sub">Top challenge selected</div>
-      <div class="bar-list" id="hardestChart"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">Life Impact Concerns (multi-select)</div>
-      <div class="chart-card-sub">How smoking is affecting their lives</div>
-      <div class="bar-list" id="lifeImpactChart"></div>
-    </div>
-  </div>
-</div>
-
-<!-- SPEND & MOTIVATION -->
-<div class="section" id="spend">
-  <div class="section-title">Spend & motivation</div>
-  <div class="section-desc">Monthly cigarette spend and self-rated quit motivation</div>
-  <div class="chart-grid">
-    <div class="chart-card">
-      <div class="chart-card-title">Monthly Spend</div>
-      <div class="chart-card-sub">How much they currently spend per month</div>
-      <div class="bar-list" id="spendChart"></div>
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">Avg spend</div>
-          <div class="stat-val" id="avgSpend" style="font-size:28px">—</div>
-        </div>
-        <div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">Annual saving</div>
-          <div class="stat-val" id="annualSaving" style="font-size:28px;color:var(--green)">—</div>
+    <!-- DEFAULT: summary -->
+    <div class="summary-panel" id="summaryPanel">
+      <div class="panel-card">
+        <div class="panel-title">Overall Completion</div>
+        <div class="completion-ring">
+          <svg class="ring-svg" width="110" height="110" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#2e2c29" stroke-width="10"/>
+            <circle id="completionRing" cx="60" cy="60" r="48" fill="none" stroke="#6aad7e" stroke-width="10"
+              stroke-dasharray="0 301.6" stroke-linecap="round"
+              style="transition:stroke-dasharray 1.2s cubic-bezier(0.16,1,0.3,1)"/>
+          </svg>
+          <div class="ring-pct" id="completionPct">—</div>
+          <div class="ring-sub">Sessions → CTA click</div>
         </div>
       </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">Motivation to Quit (self-rated)</div>
-      <div class="chart-card-sub" id="motivationSub">Scale 2–10</div>
-      <div class="motivation-grid" id="motivationGrid"></div>
-      <div style="margin-top:20px;padding:14px;background:var(--bg);border-radius:4px;border:1px solid var(--border)">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">High motivation (8–10)</div>
-        <div class="stat-val" id="highMotivation" style="font-size:32px;color:var(--green)">—</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px" id="highMotivationSub">—</div>
+      <div class="panel-card">
+        <div class="panel-title">Top Drop-off Points</div>
+        <div id="topDropoffs"></div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title">Key Observations</div>
+        <div id="keyObservations"></div>
       </div>
     </div>
+
+    <!-- DRILL-DOWN: response breakdown -->
+    <div class="drill-panel" id="drillPanel">
+      <div class="drill-header">
+        <button class="drill-back" onclick="closeDrill()">← Back</button>
+        <div class="drill-title" id="drillTitle">—</div>
+      </div>
+      <div class="drill-content">
+        <div class="drill-meta" id="drillMeta"></div>
+        <div id="drillCharts"></div>
+      </div>
+    </div>
+
   </div>
 </div>
-
-<!-- INSIGHTS -->
-<div class="section" id="insights">
-  <div class="section-title">Actionable insights</div>
-  <div class="section-desc">Key patterns derived from filtered data</div>
-  <div class="insights-grid" id="insightsGrid"></div>
-</div>
-
-</main>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG — paste your Google Sheet CSV export URL here
-// File > Share > Publish to web > Sheet1 > CSV > Copy link
-// ═══════════════════════════════════════════════════════
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyhB_4EHo73PBrC9vMDd3rYPrElzn1xOzUN1dLFNG6XTOHxEl4qJ-ExzqpsbUPTge_K/exec';
+const WORKER_URL = 'https://ga4-proxy.dry-thunder-8d18.workers.dev';
+const SHEET_URL  = 'https://script.google.com/macros/s/AKfycbyhB_4EHo73PBrC9vMDd3rYPrElzn1xOzUN1dLFNG6XTOHxEl4qJ-ExzqpsbUPTge_K/exec';
 
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let allRows = [];
-let filteredRows = [];
-let activePreset = 'all';
-let activeUtmSources = new Set(['__all__']);
-let allUtmSources = [];
+// ── STEP META ────────────────────────────────────────────────────
+const STEP_META = {
+  session_start:      { label: 'Sessions started',      phase: 'entry',   sheetKey: null },
+  Q1_gender:          { label: 'Q1 — Gender',           phase: 'quiz',    sheetKey: 'gender',          type: 'single' },
+  Q2_age:             { label: 'Q2 — Age range',        phase: 'quiz',    sheetKey: 'age',             type: 'single' },
+  Q3_goals:           { label: 'Q3 — Goals',            phase: 'quiz',    sheetKey: 'goals',           type: 'multi'  },
+  Q4_smoking_history: { label: 'Q4 — Smoking history',  phase: 'quiz',    sheetKey: 'smoking_history', type: 'single' },
+  Q5_quit_attempts:   { label: 'Q5 — Quit attempts',    phase: 'quiz',    sheetKey: 'quit_attempts',   type: 'single' },
+  Q6_methods:         { label: 'Q6 — Methods tried',    phase: 'quiz',    sheetKey: 'methods_tried',   type: 'multi'  },
+  Q7_interstitial:    { label: 'Q7 — Interstitial',     phase: 'quiz',    sheetKey: null },
+  Q8_triggers:        { label: 'Q8 — Triggers',         phase: 'quiz',    sheetKey: 'triggers',        type: 'multi'  },
+  Q9_hardest_part:    { label: 'Q9 — Hardest part',     phase: 'quiz',    sheetKey: 'hardest_part',    type: 'single' },
+  Q10_reframe:        { label: 'Q10 — Reframe',         phase: 'quiz',    sheetKey: null },
+  Q11_life_impact:    { label: 'Q11 — Life impact',     phase: 'quiz',    sheetKey: 'life_impact',     type: 'multi'  },
+  Q12_monthly_spend:  { label: 'Q12 — Monthly spend',   phase: 'quiz',    sheetKey: 'monthly_spend',   type: 'single' },
+  Q13_motivation:     { label: 'Q13 — Motivation',      phase: 'quiz',    sheetKey: 'motivation',      type: 'single' },
+  Q14_loading:        { label: 'Q14 — Loading complete', phase: 'quiz',   sheetKey: null },
+  R1_diagnosis:       { label: 'R1 — Diagnosis',        phase: 'results', sheetKey: null },
+  R2_solution:        { label: 'R2 — Solution',         phase: 'results', sheetKey: null },
+  R3_reviews:         { label: 'R3 — Reviews',          phase: 'results', sheetKey: null },
+  R4_cta:             { label: 'R4 — CTA screen',       phase: 'results', sheetKey: null },
+  R4_cta_click:       { label: 'CTA clicked →',         phase: 'results', sheetKey: null },
+};
 
-// ═══════════════════════════════════════════════════════
-// FETCH & PARSE CSV
-// ═══════════════════════════════════════════════════════
-async function fetchData() {
+// Friendly labels for raw values
+const VALUE_LABELS = {
+  gender:          { Male: 'Male', Female: 'Female' },
+  age:             { '25–34':'25–34','35–44':'35–44','45–54':'45–54','55–64':'55–64','65+':'65+' },
+  smoking_history: { 'Less than 5 years':'< 5 years','5–10 years':'5–10 yrs','10–20 years':'10–20 yrs','20+ years':'20+ years' },
+  quit_attempts:   { 'Never seriously tried':'Never','1–2 times':'1–2x','3–5 times':'3–5x','6–10 times':'6–10x',"I've lost count":'Lost count' },
+  hardest_part:    { hands:'Hands/habit', inhale:'Inhale feeling', breaks:'Break ritual', anxiety:'Anxiety', withdrawal:'Withdrawal' },
+  monthly_spend:   { '0':'$0 (social)','150':'$100–200','250':'$200–300','350':'$300–400','450':'$400+' },
+  motivation:      { '2':'Just curious (2)','4':'Figuring it out (4)','6':'Pretty motivated (6)','8':'Very ready (8)','10':'Want to quit NOW (10)' },
+  goals:           { breathe:'Breathe better', family:'Family', money:'Save money', freedom:'Freedom', smell:'Smell/taste', fitness:'Fitness', prove:'Prove it' },
+  methods_tried:   { patches:'Patches', gum:'Gum', chantix:'Chantix', vaping:'Vaping', willpower:'Willpower', allencarr:'Allen Carr', none:'None' },
+  triggers:        { coffee:'Morning coffee', stress:'Stress', meal:'After meals', driving:'Driving', social:'Social', breaks:'Work breaks', bored:'Boredom' },
+  life_impact:     { winded:'Winded', cough:'Cough', healthscare:'Health scare', kids:'Kids/grandkids', partner:'Partner concern', hiding:'Hiding it', control:'Feel controlled', dontthink:'Don\'t think about it' },
+};
+
+const BAR_COLORS = [
+  'linear-gradient(90deg,#c8a96e,#e8c98a)',
+  'linear-gradient(90deg,#6aad7e,#8ecda0)',
+  'linear-gradient(90deg,#6a9abf,#8ab8d8)',
+  'linear-gradient(90deg,#9b7fc4,#b89de0)',
+  'linear-gradient(90deg,#d4604a,#e88070)',
+  'linear-gradient(90deg,#c8a96e80,#e8c98a80)',
+  'linear-gradient(90deg,#6aad7e80,#8ecda080)',
+  'linear-gradient(90deg,#8a847a,#aaa49a)',
+];
+
+let currentSteps = [];
+let sheetRows = [];
+let activePreset = '30daysAgo';
+let activeVersion = 'quiz1';
+let activeDrill = null;
+
+// ── LOAD ALL DATA ────────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  closeDrill();
+
+  let start = activePreset, end = 'today';
+  if (activePreset === 'custom') {
+    start = document.getElementById('dateFrom').value || '30daysAgo';
+    end   = document.getElementById('dateTo').value   || 'today';
+  }
+
   try {
-    const res = await fetch(SHEET_URL + '?t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    allRows = await res.json();
-    document.getElementById('metaUpdated').textContent = new Date().toLocaleTimeString();
-    buildUTMFilters();
-    applyFilters();
+    const [funnelRes, sheetRes] = await Promise.all([
+      fetch(`${WORKER_URL}?start=${start}&end=${end}`),
+      fetch(`${SHEET_URL}?tab=${activeVersion}`)
+    ]);
+    const [funnelData, rawRows] = await Promise.all([funnelRes.json(), sheetRes.json()]);
+    if (funnelData.error) throw new Error(funnelData.error);
+
+    currentSteps = rebase(funnelData.steps);
+    sheetRows = Array.isArray(rawRows) ? rawRows : [];
+
+    renderAll();
+    document.getElementById('metaFetched').textContent = new Date(funnelData.fetchedAt).toLocaleTimeString();
+    document.getElementById('updatedBadge').textContent = 'Updated ' + new Date(funnelData.fetchedAt).toLocaleTimeString();
     hideLoading();
-  } catch (e) {
-    showError('Could not load sheet data. Make sure the Apps Script is deployed with access set to Anyone.\n' + e.message);
+  } catch(e) {
+    showError(e.message);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// UTM FILTERS
-// ═══════════════════════════════════════════════════════
-function buildUTMFilters() {
-  const sources = new Set();
-  allRows.forEach(r => {
-    const s = r.utm_source || '';
-    if (s) sources.add(s);
+function rebase(steps) {
+  const baseline = steps[0]?.count || 1;
+  return steps.map((s, i) => {
+    const prev = i > 0 ? steps[i-1].count : baseline;
+    const drop = prev - s.count;
+    return {
+      ...s,
+      dropoff:      drop,
+      dropoffPct:   prev > 0 ? Math.round(drop / prev * 100) : 0,
+      retentionPct: Math.round(s.count / baseline * 100),
+    };
   });
-  allUtmSources = ['(direct)', ...Array.from(sources).sort()];
-
-  const container = document.getElementById('utmFilters');
-  container.innerHTML = '';
-
-  // "All" button
-  const allBtn = document.createElement('button');
-  allBtn.className = 'utm-btn active';
-  allBtn.innerHTML = '<span class="dot"></span>All sources';
-  allBtn.dataset.source = '__all__';
-  allBtn.onclick = () => toggleUTM('__all__', allBtn);
-  container.appendChild(allBtn);
-
-  allUtmSources.forEach(src => {
-    const btn = document.createElement('button');
-    btn.className = 'utm-btn active';
-    btn.innerHTML = `<span class="dot"></span>${src}`;
-    btn.dataset.source = src;
-    btn.onclick = () => toggleUTM(src, btn);
-    container.appendChild(btn);
-  });
-
-  activeUtmSources = new Set(['__all__', ...allUtmSources]);
 }
 
-function toggleUTM(src, btn) {
-  if (src === '__all__') {
-    const allActive = activeUtmSources.has('__all__');
-    if (allActive) {
-      activeUtmSources.clear();
-      document.querySelectorAll('.utm-btn').forEach(b => b.classList.remove('active'));
-    } else {
-      activeUtmSources = new Set(['__all__', ...allUtmSources]);
-      document.querySelectorAll('.utm-btn').forEach(b => b.classList.add('active'));
+// ── RENDER ALL ───────────────────────────────────────────────────
+function renderAll() {
+  const steps = currentSteps;
+  if (!steps.length) return;
+
+  const top      = steps[0].count;
+  const q1       = steps.find(s => s.name === 'Q1_gender')?.count || 0;
+  const r1       = steps.find(s => s.name === 'R1_diagnosis')?.count || 0;
+  const ctaClick = steps.find(s => s.name === 'R4_cta_click')?.count || 0;
+  const completionPct = top > 0 ? Math.round(ctaClick / top * 100) : 0;
+  const ctaRate  = r1 > 0 ? Math.round(ctaClick / r1 * 100) : 0;
+  const byDrop   = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
+
+  // Stat strip
+  document.getElementById('statTop').textContent = top.toLocaleString();
+  document.getElementById('statQ1').textContent  = top > 0 ? Math.round(q1/top*100) + '%' : '—';
+  document.getElementById('statCompleted').textContent = r1.toLocaleString();
+  document.getElementById('statCTA').textContent = ctaClick.toLocaleString();
+  document.getElementById('statCompletion').textContent = completionPct + '%';
+  document.getElementById('statBigDrop').textContent = byDrop[0] ? byDrop[0].dropoffPct + '%' : '—';
+  document.getElementById('metaTop').textContent = top.toLocaleString() + ' sessions';
+
+  // Ring
+  const ringLen = (completionPct / 100) * 301.6;
+  document.getElementById('completionRing').setAttribute('stroke-dasharray', `${ringLen} 301.6`);
+  document.getElementById('completionPct').textContent = completionPct + '%';
+
+  renderFunnel(steps, top);
+  renderTopDropoffs(byDrop.slice(0,5));
+  renderObservations(steps, top, completionPct, ctaRate);
+}
+
+function renderFunnel(steps, top) {
+  const container = document.getElementById('funnelSteps');
+  let html = '', lastPhase = null;
+
+  steps.forEach((step, i) => {
+    const meta = STEP_META[step.name] || { label: step.name, phase: 'quiz', sheetKey: null };
+    const hasData = !!meta.sheetKey;
+    const widthPct = top > 0 ? (step.count / top * 100) : 0;
+    const retColor = step.retentionPct >= 90 ? 'var(--green)' : step.retentionPct >= 70 ? 'var(--accent)' : step.retentionPct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const dropColor = step.dropoffPct <= 2 ? 'var(--text-dim)' : step.dropoffPct <= 5 ? 'var(--accent)' : 'var(--red)';
+    const barColor = meta.phase === 'results' ? 'linear-gradient(90deg,#9b7fc4,#b89de0)' : meta.phase === 'entry' ? 'linear-gradient(90deg,#5a5650,#8a847a)' : 'linear-gradient(90deg,#c8a96e,#e8c98a)';
+
+    if (meta.phase !== lastPhase) {
+      const lbl = meta.phase === 'entry' ? 'Entry' : meta.phase === 'quiz' ? 'Quiz Questions' : 'Results Pages';
+      html += `<div class="funnel-section-header">${lbl}</div>`;
+      lastPhase = meta.phase;
     }
-  } else {
-    if (activeUtmSources.has(src)) {
-      activeUtmSources.delete(src);
-      btn.classList.remove('active');
-    } else {
-      activeUtmSources.add(src);
-      btn.classList.add('active');
-    }
-    // Update "All" button state
-    const allActive = allUtmSources.every(s => activeUtmSources.has(s));
-    const allBtn = document.querySelector('.utm-btn[data-source="__all__"]');
-    if (allBtn) {
-      allActive ? allBtn.classList.add('active') : allBtn.classList.remove('active');
-      allActive ? activeUtmSources.add('__all__') : activeUtmSources.delete('__all__');
-    }
+
+    html += `<div class="funnel-step${hasData ? '' : ' no-data'}" onclick="${hasData ? `drillInto('${step.name}')` : ''}">
+      <div class="step-name">
+        <span class="phase ${meta.phase}">${meta.phase}</span>
+        ${meta.label}
+        ${hasData ? '<span class="clickable-hint">↗ responses</span>' : ''}
+      </div>
+      <div class="step-bar-wrap">
+        <div class="step-bar-bg"></div>
+        <div class="step-bar-fill" style="width:0%;background:${barColor}" data-target="${widthPct.toFixed(1)}%">
+          <span class="step-bar-count">${step.count.toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="step-retention" style="color:${retColor}">${step.retentionPct}%</div>
+      <div class="step-dropoff" style="color:${dropColor}">
+        ${i > 0 && step.dropoff > 0 ? `↓ ${step.dropoffPct}%<br><span style="font-size:9px;color:var(--text-dim)">${step.dropoff.toLocaleString()} lost</span>` : '<span style="color:var(--text-dim)">—</span>'}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+  setTimeout(() => {
+    container.querySelectorAll('.step-bar-fill').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.dataset.target; }, i * 35);
+    });
+  }, 100);
+}
+
+function renderTopDropoffs(items) {
+  document.getElementById('topDropoffs').innerHTML = items.map((s, i) => {
+    const meta = STEP_META[s.name] || { label: s.name };
+    return `<div class="dropoff-item">
+      <div class="dropoff-rank">${i+1}</div>
+      <div class="dropoff-info">
+        <div class="dropoff-step">${meta.label}</div>
+        <div class="dropoff-detail">${s.dropoff.toLocaleString()} users lost</div>
+      </div>
+      <div class="dropoff-pct">${s.dropoffPct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderObservations(steps, top, completionPct, ctaRate) {
+  const obs = [];
+  const byDrop = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
+  const worst = byDrop[0];
+  const r3 = steps.find(s => s.name === 'R3_reviews');
+  const r4 = steps.find(s => s.name === 'R4_cta');
+  const q1 = steps.find(s => s.name === 'Q1_gender');
+  const sessions = steps[0]?.count || 0;
+
+  if (q1 && sessions) {
+    const ctr = Math.round(q1.count / sessions * 100);
+    const color = ctr >= 75 ? 'var(--green)' : ctr >= 50 ? 'var(--accent)' : 'var(--red)';
+    obs.push(`Q1 CTR is <strong style="color:${color}">${ctr}%</strong>${ctr >= 75 ? ' — hitting your 75% target ✓' : ' — below your 75% target'}.`);
+  }
+  if (worst) obs.push(`<strong>${STEP_META[worst.name]?.label}</strong> is the biggest single drop at <strong style="color:var(--red)">${worst.dropoffPct}%</strong> — ${worst.dropoff.toLocaleString()} people lost.`);
+  if (r3 && r4) {
+    const drop = Math.round((r3.count - r4.count) / r3.count * 100);
+    if (drop > 3) obs.push(`<strong>R3→R4</strong> loses ${drop}% — reviews page may need stronger CTA.`);
+  }
+  if (completionPct >= 60) obs.push(`<strong style="color:var(--green)">${completionPct}%</strong> session-to-CTA rate is strong.`);
+  else if (completionPct < 40) obs.push(`<strong style="color:var(--red)">${completionPct}%</strong> session-to-CTA is below target.`);
+  if (ctaRate >= 80) obs.push(`<strong style="color:var(--green)">${ctaRate}%</strong> of people who see the CTA click it.`);
+
+  document.getElementById('keyObservations').innerHTML = obs.map(o => `<div class="insight-row">${o}</div>`).join('') || '<div class="insight-row" style="color:var(--text-dim)">No observations yet.</div>';
+}
+
+// ── DRILL DOWN ───────────────────────────────────────────────────
+function drillInto(stepName) {
+  const meta = STEP_META[stepName];
+  if (!meta?.sheetKey) return;
+
+  activeDrill = stepName;
+
+  // Highlight funnel step
+  document.querySelectorAll('.funnel-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.funnel-step').forEach(s => {
+    if (s.getAttribute('onclick')?.includes(stepName)) s.classList.add('active');
+  });
+
+  // Show drill panel
+  document.getElementById('summaryPanel').style.display = 'none';
+  const drillPanel = document.getElementById('drillPanel');
+  drillPanel.classList.add('active');
+  document.getElementById('drillTitle').textContent = meta.label;
+
+  // Show spinner while computing
+  document.getElementById('drillCharts').innerHTML = '<div class="drill-spinner"><div class="drill-spinner-inner"></div></div>';
+  document.getElementById('drillMeta').innerHTML = '';
+
+  setTimeout(() => renderDrill(stepName, meta), 50);
+}
+
+function closeDrill() {
+  activeDrill = null;
+  document.querySelectorAll('.funnel-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('summaryPanel').style.display = 'flex';
+  document.getElementById('drillPanel').classList.remove('active');
+}
+
+function renderDrill(stepName, meta) {
+  const key = meta.sheetKey;
+  const n = sheetRows.length;
+
+  // Meta info
+  const step = currentSteps.find(s => s.name === stepName);
+  document.getElementById('drillMeta').innerHTML = `
+    <span>Responses <strong>${n.toLocaleString()}</strong></span>
+    ${step ? `<span>Reached this step <strong>${step.count.toLocaleString()}</strong></span>` : ''}
+    <span>Version <strong>${activeVersion}</strong></span>
+  `;
+
+  if (n === 0) {
+    document.getElementById('drillCharts').innerHTML = '<div class="no-data-msg">No response data available yet.</div>';
+    return;
+  }
+
+  if (meta.type === 'single') {
+    renderSingleChart(key, n);
+  } else if (meta.type === 'multi') {
+    renderMultiChart(key, n);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// DATE PRESETS
-// ═══════════════════════════════════════════════════════
+function renderSingleChart(key, total) {
+  const counts = {};
+  sheetRows.forEach(row => {
+    const val = String(row[key] ?? '').trim();
+    if (val) counts[val] = (counts[val] || 0) + 1;
+  });
+
+  const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+  const labels = VALUE_LABELS[key] || {};
+
+  const html = `<div class="resp-bar-list">${sorted.map(([val, count], i) => {
+    const pct = Math.round(count / total * 100);
+    const label = labels[val] || val;
+    return `<div class="resp-bar-row">
+      <div class="resp-bar-label">
+        <span class="resp-bar-label-text">${label}</span>
+        <span class="resp-bar-pct">${count.toLocaleString()} · ${pct}%</span>
+      </div>
+      <div class="resp-bar-track">
+        <div class="resp-bar-fill" style="width:0%;background:${BAR_COLORS[i % BAR_COLORS.length]}" data-target="${(count/max*100).toFixed(1)}%">
+          <span class="resp-bar-n"></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+
+  document.getElementById('drillCharts').innerHTML = html;
+  animateDrillBars();
+}
+
+function renderMultiChart(key, totalRespondents) {
+  const counts = {};
+  sheetRows.forEach(row => {
+    const val = String(row[key] ?? '').trim();
+    if (!val) return;
+    val.split(',').forEach(v => {
+      v = v.trim();
+      if (v) counts[v] = (counts[v] || 0) + 1;
+    });
+  });
+
+  const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+  const labels = VALUE_LABELS[key] || {};
+
+  const html = `
+    <div class="resp-section-lbl">% of respondents who selected each option</div>
+    <div class="resp-bar-list">${sorted.map(([val, count], i) => {
+      const pct = Math.round(count / totalRespondents * 100);
+      const label = labels[val] || val;
+      return `<div class="resp-bar-row">
+        <div class="resp-bar-label">
+          <span class="resp-bar-label-text">${label}</span>
+          <span class="resp-bar-pct">${count.toLocaleString()} · ${pct}%</span>
+        </div>
+        <div class="resp-bar-track">
+          <div class="resp-bar-fill" style="width:0%;background:${BAR_COLORS[i % BAR_COLORS.length]}" data-target="${(count/max*100).toFixed(1)}%">
+            <span class="resp-bar-n"></span>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+
+  document.getElementById('drillCharts').innerHTML = html;
+  animateDrillBars();
+}
+
+function animateDrillBars() {
+  setTimeout(() => {
+    document.querySelectorAll('#drillCharts .resp-bar-fill').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.dataset.target; }, i * 50);
+    });
+  }, 50);
+}
+
+// ── CONTROLS ─────────────────────────────────────────────────────
 function setPreset(preset, btn) {
   activePreset = preset;
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('customDateRow').style.display = preset === 'custom' ? 'flex' : 'none';
-  if (preset !== 'custom') applyFilters();
+  const labels = { '7daysAgo':'Last 7 days','30daysAgo':'Last 30 days','90daysAgo':'Last 90 days','custom':'Custom range' };
+  document.getElementById('metaPeriod').textContent = labels[preset] || preset;
+  if (preset !== 'custom') loadAll();
 }
 
-function getDateRange() {
-  const now = new Date();
-  if (activePreset === 'all') return { from: new Date('2000-01-01'), to: new Date('2099-12-31') };
-  if (activePreset === '7d') return { from: new Date(now - 7*864e5), to: now };
-  if (activePreset === '30d') return { from: new Date(now - 30*864e5), to: now };
-  if (activePreset === 'custom') {
-    const f = document.getElementById('dateFrom').value;
-    const t = document.getElementById('dateTo').value;
-    return {
-      from: f ? new Date(f) : new Date('2000-01-01'),
-      to: t ? new Date(t + 'T23:59:59') : new Date('2099-12-31')
-    };
-  }
-  return { from: new Date('2000-01-01'), to: new Date('2099-12-31') };
+function setVersion(version, btn) {
+  activeVersion = version;
+  document.querySelectorAll('.version-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAll();
 }
 
-// ═══════════════════════════════════════════════════════
-// FILTER & RENDER
-// ═══════════════════════════════════════════════════════
-function applyFilters() {
-  const { from, to } = getDateRange();
-
-  filteredRows = allRows.filter(r => {
-    // Date filter
-    const ts = new Date(r.timestamp);
-    if (isNaN(ts) || ts < from || ts > to) return false;
-
-    // UTM filter
-    const src = r.utm_source || '';
-    if (activeUtmSources.has('__all__')) return true;
-    const matchDirect = !src && activeUtmSources.has('(direct)');
-    const matchSrc = src && activeUtmSources.has(src);
-    return matchDirect || matchSrc;
-  });
-
-  document.getElementById('filteredCount').textContent = filteredRows.length.toLocaleString();
-  renderAll();
-}
-
-// ═══════════════════════════════════════════════════════
-// RENDER ALL SECTIONS
-// ═══════════════════════════════════════════════════════
-function renderAll() {
-  const n = filteredRows.length;
-  document.getElementById('metaTotal').textContent = n.toLocaleString();
-
-  if (n === 0) {
-    renderNoData();
-    return;
-  }
-
-  updatePeriodLabel();
-  renderStatStrip();
-  renderDemographics();
-  renderGoals();
-  renderHistory();
-  renderTriggers();
-  renderStruggles();
-  renderSpend();
-  renderInsights();
-}
-
-function updatePeriodLabel() {
-  if (!filteredRows.length) return;
-  const dates = filteredRows.map(r => new Date(r.timestamp)).filter(d => !isNaN(d)).sort((a,b) => a-b);
-  if (!dates.length) return;
-  const fmt = d => d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-  document.getElementById('metaPeriod').textContent = fmt(dates[0]) + ' – ' + fmt(dates[dates.length-1]);
-}
-
-function pct(count, total) { return total ? Math.round(count / total * 100) : 0; }
-function avg(arr) { return arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : 0; }
-
-// ═══════════════════════════════════════════════════════
-// STAT STRIP
-// ═══════════════════════════════════════════════════════
-function renderStatStrip() {
-  const n = filteredRows.length;
-  const female = filteredRows.filter(r => r.gender === 'Female').length;
-  const age65 = filteredRows.filter(r => r.age === '65+').length;
-  const longterm = filteredRows.filter(r => r.smoking_history === '20+ years').length;
-  const motivations = filteredRows.map(r => parseFloat(r.motivation)).filter(v => !isNaN(v));
-  const avgMot = avg(motivations);
-  const spends = filteredRows.map(r => parseFloat(r.monthly_spend)).filter(v => !isNaN(v) && v > 0);
-  const avgSp = avg(spends);
-  const lostCount = filteredRows.filter(r => r.quit_attempts === 'lost').length;
-
-  document.getElementById('statFemale').textContent = pct(female, n) + '%';
-  document.getElementById('statAge').textContent = pct(age65, n) + '%';
-  document.getElementById('statLongterm').textContent = pct(longterm, n) + '%';
-  document.getElementById('statMotivation').textContent = avgMot.toFixed(1);
-  document.getElementById('statSpend').textContent = avgSp > 0 ? '£' + Math.round(avgSp) : '—';
-  document.getElementById('statLostCount').textContent = pct(lostCount, n) + '%';
-}
-
-// ═══════════════════════════════════════════════════════
-// DEMOGRAPHICS
-// ═══════════════════════════════════════════════════════
-function renderDemographics() {
-  const n = filteredRows.length;
-  const female = filteredRows.filter(r => r.gender === 'Female').length;
-  const male = n - female;
-  const fPct = pct(female, n);
-  const mPct = 100 - fPct;
-  const circum = 301.6;
-
-  // Donut
-  const fLen = (fPct / 100) * circum;
-  const mLen = (mPct / 100) * circum;
-  document.getElementById('donutFemale').setAttribute('stroke-dasharray', `${fLen} ${circum - fLen}`);
-  document.getElementById('donutFemale').setAttribute('stroke-dashoffset', '75.4');
-  document.getElementById('donutMale').setAttribute('stroke-dasharray', `${mLen} ${circum - mLen}`);
-  document.getElementById('donutMale').setAttribute('stroke-dashoffset', (75.4 - fLen).toString());
-  document.getElementById('donutPct').textContent = fPct + '%';
-
-  document.getElementById('genderLegend').innerHTML = `
-    <div class="legend-item"><div class="legend-dot" style="background:#c8a96e"></div> Female<span class="legend-pct">${female.toLocaleString()} · ${fPct}%</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:#6a9abf"></div> Male<span class="legend-pct">${male.toLocaleString()} · ${mPct}%</span></div>`;
-
-  // Age
-  const ageGroups = [
-    { label: '65+', key: '65+', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    { label: '55–64', key: '55–64', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    { label: '45–54', key: '45–54', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    { label: '35–44', key: '35–44', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    { label: '25–34', key: '25–34', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-  ];
-  renderBarChart('ageChart', ageGroups.map(g => ({
-    label: g.label,
-    count: filteredRows.filter(r => r.age === g.key).length,
-    total: n, color: g.color
-  })));
-}
-
-// ═══════════════════════════════════════════════════════
-// GOALS
-// ═══════════════════════════════════════════════════════
-function renderGoals() {
-  const n = filteredRows.length;
-  const goalMap = {
-    'money': { label: 'Save money 💰', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    'breathe': { label: 'Breathe easier 🫁', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    'family': { label: 'Family 👨‍👩‍👧', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    'freedom': { label: 'Freedom 🕊', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    'fitness': { label: 'Fitness 🏃', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    'prove': { label: 'Prove I can do it', color: 'linear-gradient(90deg,#c8a96e80,#e8c98a80)' },
-    'smell': { label: 'Smell / taste 👃', color: 'linear-gradient(90deg,#6aad7e80,#8ecda080)' },
-  };
-  const counts = {};
-  Object.keys(goalMap).forEach(k => counts[k] = 0);
-  filteredRows.forEach(r => {
-    (r.goals || '').split(',').forEach(g => { g = g.trim(); if (counts[g] !== undefined) counts[g]++; });
-  });
-  const items = Object.entries(goalMap).map(([k, v]) => ({ label: v.label, count: counts[k], total: n, color: v.color }))
-    .sort((a, b) => b.count - a.count);
-  renderBarChart('goalsChart', items);
-}
-
-// ═══════════════════════════════════════════════════════
-// HISTORY
-// ═══════════════════════════════════════════════════════
-function renderHistory() {
-  const n = filteredRows.length;
-  const histMap = [
-    { label: '20+ years', key: '20+ years', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    { label: '10–20 years', key: '10–20 years', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    { label: '5–10 years', key: '5–10 years', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    { label: '< 5 years', key: 'Less than 5 years', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-  ];
-  renderBarChart('smokingHistoryChart', histMap.map(g => ({
-    label: g.label, count: filteredRows.filter(r => r.smoking_history === g.key).length, total: n, color: g.color
-  })));
-
-  const attemptsMap = [
-    { label: 'Lost count', key: 'lost', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    { label: '3–5 times', key: '3-5', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    { label: '6–10 times', key: '6-10', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    { label: '1–2 times', key: '1-2', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    { label: 'Never seriously', key: 'never', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-  ];
-  renderBarChart('quitAttemptsChart', attemptsMap.map(g => ({
-    label: g.label, count: filteredRows.filter(r => r.quit_attempts === g.key).length, total: n, color: g.color
-  })));
-
-  const methodMap = {
-    'patches': { label: 'Patches 🩹', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    'willpower': { label: 'Willpower only', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    'chantix': { label: 'Chantix / Varenicline', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    'gum': { label: 'Gum 🍬', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    'vaping': { label: 'Vaping', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    'none': { label: 'None / first attempt', color: 'linear-gradient(90deg,#8a847a,#aaa49a)' },
-    'allencarr': { label: 'Allen Carr', color: 'linear-gradient(90deg,#8a847a50,#aaa49a50)' },
-  };
-  const mCounts = {};
-  Object.keys(methodMap).forEach(k => mCounts[k] = 0);
-  filteredRows.forEach(r => {
-    (r.methods_tried || '').split(',').forEach(m => { m = m.trim(); if (mCounts[m] !== undefined) mCounts[m]++; });
-  });
-  const mItems = Object.entries(methodMap).map(([k, v]) => ({ label: v.label, count: mCounts[k], total: n, color: v.color }))
-    .sort((a, b) => b.count - a.count);
-  renderBarChart('methodsChart', mItems);
-}
-
-// ═══════════════════════════════════════════════════════
-// TRIGGERS
-// ═══════════════════════════════════════════════════════
-function renderTriggers() {
-  const n = filteredRows.length;
-  const triggerMap = {
-    'meal': { label: 'After meals 🍽', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    'stress': { label: 'Stress 😰', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    'coffee': { label: 'Coffee / morning ☕', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    'bored': { label: 'Boredom 😑', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    'driving': { label: 'Driving 🚗', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    'social': { label: 'Social settings 🥂', color: 'linear-gradient(90deg,#c8a96e80,#e8c98a80)' },
-    'breaks': { label: 'Work breaks', color: 'linear-gradient(90deg,#6aad7e80,#8ecda080)' },
-  };
-  const counts = {};
-  Object.keys(triggerMap).forEach(k => counts[k] = 0);
-  filteredRows.forEach(r => {
-    (r.triggers || '').split(',').forEach(t => { t = t.trim(); if (counts[t] !== undefined) counts[t]++; });
-  });
-  const items = Object.entries(triggerMap).map(([k, v]) => ({ label: v.label, count: counts[k], total: n, color: v.color }))
-    .sort((a, b) => b.count - a.count);
-  renderBarChart('triggersChart', items);
-}
-
-// ═══════════════════════════════════════════════════════
-// STRUGGLES
-// ═══════════════════════════════════════════════════════
-function renderStruggles() {
-  const n = filteredRows.length;
-  const hardestMap = {
-    'anxiety': { label: 'Anxiety 😟', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    'withdrawal': { label: 'Withdrawal 💊', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    'hands': { label: 'Hands / habit 🤲', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    'inhale': { label: 'The inhale feeling', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    'breaks': { label: 'Breaks ritual', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-  };
-  const hCounts = {};
-  Object.keys(hardestMap).forEach(k => hCounts[k] = 0);
-  filteredRows.forEach(r => { const h = (r.hardest_part || '').trim(); if (hCounts[h] !== undefined) hCounts[h]++; });
-  renderBarChart('hardestChart', Object.entries(hardestMap).map(([k,v]) => ({ label: v.label, count: hCounts[k], total: n, color: v.color })).sort((a,b) => b.count-a.count));
-
-  const impactMap = {
-    'control': { label: 'Feel out of control', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    'winded': { label: 'Winded / breathless', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    'cough': { label: 'Cough 🤧', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    'kids': { label: 'Kids / grandkids 👶', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    'partner': { label: 'Partner concern ❤️', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-    'healthscare': { label: 'Health scare 🏥', color: 'linear-gradient(90deg,#d4604a80,#e8807080)' },
-    'hiding': { label: 'Hiding it from others', color: 'linear-gradient(90deg,#8a847a,#aaa49a)' },
-    'dontthink': { label: 'Think it\'s not bad', color: 'linear-gradient(90deg,#8a847a50,#aaa49a50)' },
-  };
-  const iCounts = {};
-  Object.keys(impactMap).forEach(k => iCounts[k] = 0);
-  filteredRows.forEach(r => {
-    (r.life_impact || '').split(',').forEach(i => { i = i.trim(); if (iCounts[i] !== undefined) iCounts[i]++; });
-  });
-  renderBarChart('lifeImpactChart', Object.entries(impactMap).map(([k,v]) => ({ label: v.label, count: iCounts[k], total: n, color: v.color })).sort((a,b) => b.count-a.count));
-}
-
-// ═══════════════════════════════════════════════════════
-// SPEND & MOTIVATION
-// ═══════════════════════════════════════════════════════
-function renderSpend() {
-  const n = filteredRows.length;
-  const spendMap = [
-    { label: '£0 (social)', key: '0', color: 'linear-gradient(90deg,#9b7fc4,#b89de0)' },
-    { label: '£150 / mo', key: '150', color: 'linear-gradient(90deg,#6aad7e,#8ecda0)' },
-    { label: '£250 / mo', key: '250', color: 'linear-gradient(90deg,#c8a96e,#e8c98a)' },
-    { label: '£350 / mo', key: '350', color: 'linear-gradient(90deg,#d4604a,#e88070)' },
-    { label: '£450 / mo', key: '450', color: 'linear-gradient(90deg,#6a9abf,#8ab8d8)' },
-  ];
-  renderBarChart('spendChart', spendMap.map(g => ({
-    label: g.label, count: filteredRows.filter(r => String(r.monthly_spend) === g.key).length, total: n, color: g.color
-  })));
-
-  const spends = filteredRows.map(r => parseFloat(r.monthly_spend)).filter(v => !isNaN(v) && v > 0);
-  const avgSp = spends.length ? Math.round(avg(spends)) : 0;
-  document.getElementById('avgSpend').textContent = avgSp > 0 ? '£' + avgSp : '—';
-  document.getElementById('annualSaving').textContent = avgSp > 0 ? '£' + (avgSp * 12).toLocaleString() : '—';
-
-  // Motivation
-  const motLevels = [2, 4, 6, 8, 10];
-  const motColors = { 2: '#d4604a', 4: '#c8a96e', 6: '#c8a96e', 8: '#6aad7e', 10: '#6aad7e' };
-  const motCounts = {};
-  motLevels.forEach(m => motCounts[m] = 0);
-  filteredRows.forEach(r => {
-    const m = parseInt(r.motivation);
-    if (motCounts[m] !== undefined) motCounts[m]++;
-  });
-  const total = Object.values(motCounts).reduce((a,b) => a+b, 0);
-  const motValues = filteredRows.map(r => parseFloat(r.motivation)).filter(v => !isNaN(v));
-  const avgMot = avg(motValues);
-  const medMot = motValues.sort((a,b)=>a-b)[Math.floor(motValues.length/2)] || 0;
-  document.getElementById('motivationSub').textContent = `Scale 2–10 · Mean = ${avgMot.toFixed(1)} · Median = ${medMot}`;
-
-  document.getElementById('motivationGrid').innerHTML = motLevels.map(m => `
-    <div class="mot-block">
-      <div class="mot-score" style="color:${motColors[m]}">${m}</div>
-      <div class="mot-n">${motCounts[m].toLocaleString()}</div>
-      <div class="mot-pct">${pct(motCounts[m], total)}%</div>
-    </div>`).join('');
-
-  const high = filteredRows.filter(r => parseFloat(r.motivation) >= 8).length;
-  document.getElementById('highMotivation').textContent = pct(high, n) + '%';
-  document.getElementById('highMotivationSub').textContent = `${high.toLocaleString()} of ${n.toLocaleString()} respondents rated 8 or above`;
-}
-
-// ═══════════════════════════════════════════════════════
-// INSIGHTS (dynamic)
-// ═══════════════════════════════════════════════════════
-function renderInsights() {
-  const n = filteredRows.length;
-
-  const female = filteredRows.filter(r => r.gender === 'Female').length;
-  const age55plus = filteredRows.filter(r => ['55–64','65+'].includes(r.age)).length;
-  const longterm = filteredRows.filter(r => r.smoking_history === '20+ years').length;
-
-  const goalCounts = {};
-  filteredRows.forEach(r => (r.goals||'').split(',').forEach(g => { g=g.trim(); goalCounts[g] = (goalCounts[g]||0)+1; }));
-  const topGoals = Object.entries(goalCounts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k]) => k);
-
-  const trigCounts = {};
-  filteredRows.forEach(r => (r.triggers||'').split(',').forEach(t => { t=t.trim(); trigCounts[t] = (trigCounts[t]||0)+1; }));
-  const topTrig = Object.entries(trigCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k]) => k);
-
-  const hardCounts = {};
-  filteredRows.forEach(r => { const h=(r.hardest_part||'').trim(); hardCounts[h] = (hardCounts[h]||0)+1; });
-  const topHard = Object.entries(hardCounts).sort((a,b)=>b[1]-a[1])[0];
-
-  const high = filteredRows.filter(r => parseFloat(r.motivation) >= 8).length;
-  const perfect10 = filteredRows.filter(r => parseFloat(r.motivation) === 10).length;
-  const lostCount = filteredRows.filter(r => r.quit_attempts === 'lost').length;
-  const manyAttempts = filteredRows.filter(r => ['lost','3-5','6-10'].includes(r.quit_attempts)).length;
-  const spends = filteredRows.map(r => parseFloat(r.monthly_spend)).filter(v => !isNaN(v) && v > 0);
-  const avgSp = spends.length ? Math.round(avg(spends)) : 0;
-
-  const insightsData = [
-    {
-      label: 'Audience Profile', type: '',
-      headline: `${pct(female,n)}% female, ${pct(age55plus,n)}% aged 55+`,
-      body: `${pct(longterm,n)}% have smoked 20+ years. This is a deeply habituated audience — not beginners. Generic messaging won't land.`,
-      stat: '55+'
-    },
-    {
-      label: 'Top Motivators', type: 'green',
-      headline: `${pct(goalCounts['money']||0,n)}% want to save money, ${pct(goalCounts['breathe']||0,n)}% want to breathe easier`,
-      body: `Lead with financial savings${avgSp>0?' (avg £'+avgSp+'/mo = £'+(avgSp*12).toLocaleString()+'/yr)':''} and immediate breathing relief. Family and freedom close behind.`,
-      stat: avgSp > 0 ? '£'+(avgSp*12).toLocaleString() : 'Health'
-    },
-    {
-      label: 'Failed Methods', type: 'red',
-      headline: 'Most have already tried patches, willpower & prescription meds',
-      body: `Position Nordic Goods as different from these proven failures. Don't compete — differentiate.`,
-      stat: '3+'
-    },
-    {
-      label: 'Trigger Windows', type: 'blue',
-      headline: `Top triggers: ${topTrig.join(', ')}`,
-      body: `These are precise ritual moments. Product messaging and habit-replacement strategies should target these exact windows.`,
-      stat: topTrig.length + '× daily'
-    },
-    {
-      label: 'Core Fear', type: 'purple',
-      headline: `${topHard ? topHard[0] : 'Anxiety'} is the #1 barrier`,
-      body: `${topHard ? pct(topHard[1],n)+'%' : ''} cite this as their hardest challenge. Address it directly in copy and product positioning.`,
-      stat: '#1'
-    },
-    {
-      label: 'Purchase Intent', type: 'green',
-      headline: `${pct(high,n)}% rate motivation 8–10/10`,
-      body: `${pct(perfect10,n)}% gave themselves a perfect 10. This is a warm, ready-to-act audience. Reduce friction — they want to quit.`,
-      stat: pct(perfect10,n) + '%'
-    },
-    {
-      label: 'Repeat Tryers', type: 'red',
-      headline: `${pct(lostCount,n)}% have lost count of quit attempts`,
-      body: `${pct(manyAttempts,n)}% have tried 3+ times. Validate their previous attempts. Reframe this as science-backed, not "just another try."`,
-      stat: pct(manyAttempts,n) + '%'
-    },
-  ];
-
-  document.getElementById('insightsGrid').innerHTML = insightsData.map(ins => `
-    <div class="insight-card ${ins.type}">
-      <div class="insight-label">${ins.label}</div>
-      <div class="insight-headline">${ins.headline}</div>
-      <div class="insight-body">${ins.body}</div>
-      <div class="insight-stat">${ins.stat}</div>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════
-// GENERIC BAR CHART RENDERER
-// ═══════════════════════════════════════════════════════
-function renderBarChart(containerId, items) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  if (!items.length || items.every(i => i.count === 0)) {
-    el.innerHTML = '<div class="no-data">No data for selected filters</div>';
-    return;
-  }
-  const max = Math.max(...items.map(i => i.count));
-  el.innerHTML = items.map(item => {
-    const widthPct = max > 0 ? (item.count / max * 100) : 0;
-    const displayPct = pct(item.count, item.total);
-    return `<div class="bar-row">
-      <div class="bar-label">${item.label}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:0%;background:${item.color}" data-target="${widthPct.toFixed(1)}%"></div></div>
-      <div class="bar-count">${item.count.toLocaleString()} · ${displayPct}%</div>
-    </div>`;
-  }).join('');
-  // Animate bars
-  setTimeout(() => {
-    el.querySelectorAll('.bar-fill').forEach(bar => {
-      bar.style.width = bar.dataset.target;
-    });
-  }, 50);
-}
-
-function renderNoData() {
-  ['ageChart','goalsChart','smokingHistoryChart','quitAttemptsChart','methodsChart',
-   'triggersChart','hardestChart','lifeImpactChart','spendChart'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<div class="no-data">No data for selected filters</div>';
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// NAV
-// ═══════════════════════════════════════════════════════
-function showSection(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if (btn) btn.classList.add('active');
-}
-
-// ═══════════════════════════════════════════════════════
-// LOADING HELPERS
-// ═══════════════════════════════════════════════════════
 function hideLoading() {
-  const overlay = document.getElementById('loadingOverlay');
-  overlay.classList.add('hidden');
-  setTimeout(() => overlay.style.display = 'none', 500);
+  const o = document.getElementById('loadingOverlay');
+  o.classList.add('hidden');
+  setTimeout(() => o.style.display = 'none', 500);
 }
 
 function showError(msg) {
-  const errEl = document.getElementById('loadError');
-  errEl.style.display = 'block';
-  errEl.textContent = msg;
-  document.querySelector('.loading-text').textContent = 'Failed to load data';
+  document.getElementById('loadError').style.display = 'block';
+  document.getElementById('loadError').textContent = msg;
+  document.querySelector('.loading-text').textContent = 'Failed to load';
   document.querySelector('.loading-spinner').style.display = 'none';
 }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-fetchData();
+// ── INIT ─────────────────────────────────────────────────────────
+loadAll();
 </script>
 </body>
 </html>

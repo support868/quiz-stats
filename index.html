@@ -178,9 +178,10 @@
   <button class="preset-btn" id="fbFilterBtn" onclick="toggleFacebook(this)">Facebook only</button>
   <div class="filters-right" style="display:flex;gap:6px;align-items:center;">
     <span class="filter-label">Version</span>
-    <button class="version-btn active" onclick="setVersion('quiz1',this)">Quiz 1</button>
-    <button class="version-btn" onclick="setVersion('quiz2',this)">Quiz 2</button>
-    <button class="version-btn" onclick="setVersion('quiz1_archived',this)">Quiz 1 (archived)</button>
+    <span id="versionFilterRow" style="display:flex;gap:6px;align-items:center;">
+      <span class="filter-label">Version</span>
+      <span id="versionBtns" style="display:flex;gap:6px;"></span>
+    </span>
     <span id="updatedBadge" style="margin-left:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);">—</span>
   </div>
 </div>
@@ -332,7 +333,31 @@ function toggleFacebook(btn) {
   );
 }
 
-// ── LOAD ALL DATA ────────────────────────────────────────────────
+// ── LOAD TABS ────────────────────────────────────────────────────
+async function loadTabs() {
+  try {
+    const res = await fetch(`${SHEET_URL}?tabs=true`);
+    const tabs = await res.json();
+    const container = document.getElementById('versionBtns');
+    container.innerHTML = '';
+    tabs.forEach((tab, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'version-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = tab;
+      btn.onclick = () => setVersion(tab, btn);
+      container.appendChild(btn);
+    });
+    // Set initial version to first tab
+    if (tabs.length > 0) activeVersion = tabs[0];
+  } catch(e) {
+    // Fallback to defaults if tab discovery fails
+    document.getElementById('versionBtns').innerHTML = `
+      <button class="version-btn active" onclick="setVersion('quiz1',this)">quiz1</button>
+      <button class="version-btn" onclick="setVersion('quiz2',this)">quiz2</button>`;
+  }
+}
+
+
 async function loadAll() {
   document.getElementById('loadingOverlay').classList.remove('hidden');
   document.getElementById('loadingOverlay').style.display = 'flex';
@@ -349,7 +374,7 @@ async function loadAll() {
 
   try {
     const [funnelRes, sheetRes] = await Promise.all([
-      fetch(`${WORKER_URL}?start=${start}&end=${end}`),
+      fetch(`${WORKER_URL}?start=${start}&end=${end}&version=${activeVersion}`),
       fetch(`${SHEET_URL}?tab=${activeVersion}`)
     ]);
     const [funnelData, rawRows] = await Promise.all([funnelRes.json(), sheetRes.json()]);
@@ -647,7 +672,7 @@ function setPreset(preset, btn) {
 function setVersion(version, btn) {
   activeVersion = version;
   document.querySelectorAll('.version-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   loadAll();
 }
 
@@ -665,7 +690,7 @@ function showError(msg) {
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
-loadAll();
+loadTabs().then(() => loadAll());
 </script>
 </body>
 </html>

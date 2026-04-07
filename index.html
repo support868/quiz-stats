@@ -403,6 +403,10 @@ async function loadAll() {
     if (funnelData.error) throw new Error(funnelData.error);
 
     currentSteps = rebase(fixSessionBaseline(funnelData.steps));
+    // If specific R*_cta_click events exist, drop the generic cta_click duplicate
+    if (currentSteps.some(s => /^R\d+_cta_click$/i.test(s.name))) {
+      currentSteps = currentSteps.filter(s => s.name !== 'cta_click');
+    }
     sheetRows = Array.isArray(rawRows) ? rawRows : [];
 
     renderAll();

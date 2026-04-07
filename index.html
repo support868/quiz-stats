@@ -252,8 +252,12 @@ const WORKER_URL = 'https://ga4-proxy.dry-thunder-8d18.workers.dev';
 const SHEET_URL  = 'https://script.google.com/macros/s/AKfycbyhB_4EHo73PBrC9vMDd3rYPrElzn1xOzUN1dLFNG6XTOHxEl4qJ-ExzqpsbUPTge_K/exec';
 
 // ── STEP META ────────────────────────────────────────────────────
+// Covers both quiz versions. Steps not in this map get auto-labelled
+// from their event name so new quizzes don't break the funnel.
 const STEP_META = {
+  // ── entry ──
   session_start:      { label: 'Sessions started',      phase: 'entry',   sheetKey: null },
+  // ── quiz questions (shared) ──
   Q1_gender:          { label: 'Q1 — Gender',           phase: 'quiz',    sheetKey: 'gender',          type: 'single' },
   Q2_age:             { label: 'Q2 — Age range',        phase: 'quiz',    sheetKey: 'age',             type: 'single' },
   Q3_goals:           { label: 'Q3 — Goals',            phase: 'quiz',    sheetKey: 'goals',           type: 'multi'  },
@@ -263,16 +267,31 @@ const STEP_META = {
   Q7_interstitial:    { label: 'Q7 — Interstitial',     phase: 'quiz',    sheetKey: null },
   Q8_triggers:        { label: 'Q8 — Triggers',         phase: 'quiz',    sheetKey: 'triggers',        type: 'multi'  },
   Q9_hardest_part:    { label: 'Q9 — Hardest part',     phase: 'quiz',    sheetKey: 'hardest_part',    type: 'single' },
+  // ── old quiz only ──
   Q10_reframe:        { label: 'Q10 — Reframe',         phase: 'quiz',    sheetKey: null },
   Q11_life_impact:    { label: 'Q11 — Life impact',     phase: 'quiz',    sheetKey: 'life_impact',     type: 'multi'  },
   Q12_monthly_spend:  { label: 'Q12 — Monthly spend',   phase: 'quiz',    sheetKey: 'monthly_spend',   type: 'single' },
   Q13_motivation:     { label: 'Q13 — Motivation',      phase: 'quiz',    sheetKey: 'motivation',      type: 'single' },
   Q14_loading:        { label: 'Q14 — Loading complete', phase: 'quiz',   sheetKey: null },
+  // ── new quiz (quiz1-r2o2): Q10 maps to life_impact, steps renumbered ──
+  Q10_life_impact:    { label: 'Q10 — Life impact',     phase: 'quiz',    sheetKey: 'life_impact',     type: 'multi'  },
+  Q11_monthly_spend:  { label: 'Q11 — Monthly spend',   phase: 'quiz',    sheetKey: 'monthly_spend',   type: 'single' },
+  Q12_motivation:     { label: 'Q12 — Motivation',      phase: 'quiz',    sheetKey: 'motivation',      type: 'single' },
+  Q14_name:           { label: 'Q14 — Name',            phase: 'quiz',    sheetKey: null },
+  Q15_loading:        { label: 'Q15 — Loading complete', phase: 'quiz',   sheetKey: null },
+  quiz_complete:      { label: 'Quiz complete',          phase: 'quiz',   sheetKey: null },
+  // ── results (old quiz) ──
   R1_diagnosis:       { label: 'R1 — Diagnosis',        phase: 'results', sheetKey: null },
   R2_solution:        { label: 'R2 — Solution',         phase: 'results', sheetKey: null },
   R3_reviews:         { label: 'R3 — Reviews',          phase: 'results', sheetKey: null },
   R4_cta:             { label: 'R4 — CTA screen',       phase: 'results', sheetKey: null },
   R4_cta_click:       { label: 'CTA clicked →',         phase: 'results', sheetKey: null },
+  // ── results (new quiz: quiz1-r2o2) ──
+  R2_addiction_type:  { label: 'R2 — Addiction type',  phase: 'results', sheetKey: null },
+  R3_product:         { label: 'R3 — Product',         phase: 'results', sheetKey: null },
+  R4_personal_benefits:{ label: 'R4 — Personal benefits', phase: 'results', sheetKey: null },
+  R5_offer:           { label: 'R5 — Offer',           phase: 'results', sheetKey: null },
+  R5_cta_click:       { label: 'CTA clicked →',        phase: 'results', sheetKey: null },
 };
 
 // Friendly labels for raw values
@@ -327,9 +346,12 @@ function toggleFacebook(btn) {
     const meta = STEP_META[activeDrill];
     if (meta) renderDrill(activeDrill, meta);
   }
-  renderObservations(currentSteps, currentSteps[0]?.count || 0,
-    currentSteps[0]?.count > 0 ? Math.round((currentSteps.find(s=>s.name==='R4_cta_click')?.count||0)/currentSteps[0].count*100) : 0,
-    currentSteps.find(s=>s.name==='R1_diagnosis')?.count > 0 ? Math.round((currentSteps.find(s=>s.name==='R4_cta_click')?.count||0)/currentSteps.find(s=>s.name==='R1_diagnosis').count*100) : 0
+  const _top = currentSteps[0]?.count || 0;
+  const _cta = currentSteps.slice().reverse().find(s=>s.name.includes('cta_click'))?.count || 0;
+  const _r1  = currentSteps.find(s=>(STEP_META[s.name]?.phase||derivePhase(s.name))==='results')?.count || 0;
+  renderObservations(currentSteps, _top,
+    _top > 0 ? Math.round(_cta/_top*100) : 0,
+    _r1  > 0 ? Math.round(_cta/_r1*100)  : 0
   );
 }
 
@@ -380,7 +402,7 @@ async function loadAll() {
     const [funnelData, rawRows] = await Promise.all([funnelRes.json(), sheetRes.json()]);
     if (funnelData.error) throw new Error(funnelData.error);
 
-    currentSteps = rebase(funnelData.steps);
+    currentSteps = rebase(fixSessionBaseline(funnelData.steps));
     sheetRows = Array.isArray(rawRows) ? rawRows : [];
 
     renderAll();
@@ -390,6 +412,13 @@ async function loadAll() {
   } catch(e) {
     showError(e.message);
   }
+}
+
+// ── SESSION FIX ──────────────────────────────────────────────────
+// Strip quiz_start from steps entirely — session_start is the baseline.
+function fixSessionBaseline(steps) {
+  if (!steps || !steps.length) return steps;
+  return steps.filter(s => s.name !== 'quiz_start');
 }
 
 function rebase(steps) {
@@ -406,6 +435,20 @@ function rebase(steps) {
   });
 }
 
+// ── HELPERS ──────────────────────────────────────────────────────
+// Infers phase from event name for events not in STEP_META
+function derivePhase(name) {
+  if (!name) return 'quiz';
+  if (name === 'session_start') return 'entry';
+  if (/^R\d+_/i.test(name) || name.includes('cta_click')) return 'results';
+  return 'quiz';
+}
+
+// Builds a friendly label for any event name not in STEP_META
+function deriveLabel(name) {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 // ── RENDER ALL ───────────────────────────────────────────────────
 function renderAll() {
   const steps = currentSteps;
@@ -413,8 +456,10 @@ function renderAll() {
 
   const top      = steps[0].count;
   const q1       = steps.find(s => s.name === 'Q1_gender')?.count || 0;
-  const r1       = steps.find(s => s.name === 'R1_diagnosis')?.count || 0;
-  const ctaClick = steps.find(s => s.name === 'R4_cta_click')?.count || 0;
+  // Dynamically find the first results step and the CTA click — works for any quiz version
+  const firstResultStep = steps.find(s => (STEP_META[s.name]?.phase || derivePhase(s.name)) === 'results');
+  const r1       = firstResultStep?.count || 0;
+  const ctaClick = steps.slice().reverse().find(s => s.name.includes('cta_click'))?.count || 0;
   const completionPct = top > 0 ? Math.round(ctaClick / top * 100) : 0;
   const ctaRate  = r1 > 0 ? Math.round(ctaClick / r1 * 100) : 0;
   const byDrop   = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
@@ -443,7 +488,7 @@ function renderFunnel(steps, top) {
   let html = '', lastPhase = null;
 
   steps.forEach((step, i) => {
-    const meta = STEP_META[step.name] || { label: step.name, phase: 'quiz', sheetKey: null };
+    const meta = STEP_META[step.name] || { label: deriveLabel(step.name), phase: derivePhase(step.name), sheetKey: null };
     const hasData = !!meta.sheetKey;
     const widthPct = top > 0 ? (step.count / top * 100) : 0;
     const retColor = step.retentionPct >= 90 ? 'var(--green)' : step.retentionPct >= 70 ? 'var(--accent)' : step.retentionPct >= 50 ? 'var(--yellow)' : 'var(--red)';
@@ -485,7 +530,7 @@ function renderFunnel(steps, top) {
 
 function renderTopDropoffs(items) {
   document.getElementById('topDropoffs').innerHTML = items.map((s, i) => {
-    const meta = STEP_META[s.name] || { label: s.name };
+    const meta = STEP_META[s.name] || { label: deriveLabel(s.name) };
     return `<div class="dropoff-item">
       <div class="dropoff-rank">${i+1}</div>
       <div class="dropoff-info">
@@ -501,8 +546,10 @@ function renderObservations(steps, top, completionPct, ctaRate) {
   const obs = [];
   const byDrop = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
   const worst = byDrop[0];
-  const r3 = steps.find(s => s.name === 'R3_reviews');
-  const r4 = steps.find(s => s.name === 'R4_cta');
+  // Find result steps dynamically — works for R3_reviews (old) or R3_product (new), etc.
+  const resultSteps = steps.filter(s => (STEP_META[s.name]?.phase || derivePhase(s.name)) === 'results');
+  const r3 = resultSteps[2]; // 3rd result page (R3)
+  const r4 = resultSteps[3]; // 4th result page (R4)
   const q1 = steps.find(s => s.name === 'Q1_gender');
   const sessions = steps[0]?.count || 0;
 

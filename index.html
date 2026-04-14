@@ -251,51 +251,35 @@
 const WORKER_URL = 'https://ga4-proxy.dry-thunder-8d18.workers.dev';
 const SHEET_URL  = 'https://script.google.com/macros/s/AKfycbyhB_4EHo73PBrC9vMDd3rYPrElzn1xOzUN1dLFNG6XTOHxEl4qJ-ExzqpsbUPTge_K/exec';
 
-// ── STEP META ────────────────────────────────────────────────────
-// Covers both quiz versions. Steps not in this map get auto-labelled
-// from their event name so new quizzes don't break the funnel.
-const STEP_META = {
-  // ── entry ──
-  session_start:      { label: 'Sessions started',      phase: 'entry',   sheetKey: null },
-  // ── quiz questions (shared) ──
-  Q1_gender:          { label: 'Q1 — Gender',           phase: 'quiz',    sheetKey: 'gender',          type: 'single' },
-  Q2_age:             { label: 'Q2 — Age range',        phase: 'quiz',    sheetKey: 'age',             type: 'single' },
-  Q3_goals:           { label: 'Q3 — Goals',            phase: 'quiz',    sheetKey: 'goals',           type: 'multi'  },
-  Q4_smoking_history: { label: 'Q4 — Smoking history',  phase: 'quiz',    sheetKey: 'smoking_history', type: 'single' },
-  Q5_quit_attempts:   { label: 'Q5 — Quit attempts',    phase: 'quiz',    sheetKey: 'quit_attempts',   type: 'single' },
-  Q6_methods:         { label: 'Q6 — Methods tried',    phase: 'quiz',    sheetKey: 'methods_tried',   type: 'multi'  },
-  Q7_interstitial:    { label: 'Q7 — Interstitial',     phase: 'quiz',    sheetKey: null },
-  Q8_triggers:        { label: 'Q8 — Triggers',         phase: 'quiz',    sheetKey: 'triggers',        type: 'multi'  },
-  Q9_hardest_part:    { label: 'Q9 — Hardest part',     phase: 'quiz',    sheetKey: 'hardest_part',    type: 'single' },
-  // ── old quiz only ──
-  Q10_reframe:        { label: 'Q10 — Reframe',         phase: 'quiz',    sheetKey: null },
-  Q11_life_impact:    { label: 'Q11 — Life impact',     phase: 'quiz',    sheetKey: 'life_impact',     type: 'multi'  },
-  Q12_monthly_spend:  { label: 'Q12 — Monthly spend',   phase: 'quiz',    sheetKey: 'monthly_spend',   type: 'single' },
-  Q13_motivation:     { label: 'Q13 — Motivation',      phase: 'quiz',    sheetKey: 'motivation',      type: 'single' },
-  Q14_loading:        { label: 'Q14 — Loading complete', phase: 'quiz',   sheetKey: null },
-  // ── new quiz (quiz1-r2o2): Q10 maps to life_impact, steps renumbered ──
-  Q10_life_impact:    { label: 'Q10 — Life impact',     phase: 'quiz',    sheetKey: 'life_impact',     type: 'multi'  },
-  Q11_monthly_spend:  { label: 'Q11 — Monthly spend',   phase: 'quiz',    sheetKey: 'monthly_spend',   type: 'single' },
-  Q12_motivation:     { label: 'Q12 — Motivation',      phase: 'quiz',    sheetKey: 'motivation',      type: 'single' },
-  Q14_name:           { label: 'Q14 — Name',            phase: 'quiz',    sheetKey: null },
-  Q15_loading:        { label: 'Q15 — Loading complete', phase: 'quiz',   sheetKey: null },
-  quiz_complete:      { label: 'Quiz complete',          phase: 'quiz',   sheetKey: null },
-  // ── results (old quiz) ──
-  R1_diagnosis:       { label: 'R1 — Diagnosis',        phase: 'results', sheetKey: null },
-  R2_solution:        { label: 'R2 — Solution',         phase: 'results', sheetKey: null },
-  R3_reviews:         { label: 'R3 — Reviews',          phase: 'results', sheetKey: null },
-  R4_cta:             { label: 'R4 — CTA screen',       phase: 'results', sheetKey: null },
-  R4_cta_click:       { label: 'CTA clicked →',         phase: 'results', sheetKey: null },
-  // ── results (new quiz: quiz1-r2o2) ──
-  R2_addiction_type:  { label: 'R2 — Addiction type',  phase: 'results', sheetKey: null },
-  R3_product:         { label: 'R3 — Product',         phase: 'results', sheetKey: null },
-  R4_personal_benefits:{ label: 'R4 — Personal benefits', phase: 'results', sheetKey: null },
-  R5_offer:           { label: 'R5 — Offer',           phase: 'results', sheetKey: null },
-  R5_generate_code:   { label: 'R5 — Generate code',   phase: 'results', sheetKey: null },
-  R5_cta_click:       { label: 'CTA clicked →',        phase: 'results', sheetKey: null },
+// ── DYNAMIC STEP META ────────────────────────────────────────────
+// Derives phase, label, sheetKey, and type from the event name automatically.
+// No hardcoded per-quiz config needed — works for any quiz version.
+
+// Optional overrides: if a sheet column name doesn't match the auto-derived key,
+// or you want a custom label, add it here. Keyed by event name.
+const STEP_OVERRIDES = {
+  // Example: 'Q3_goals': { sheetKey: 'goals', type: 'multi', label: 'Q3 — Goals' },
 };
 
-// Friendly labels for raw values
+// Sheet columns that support drill-down, with their chart type.
+// This is the ONE thing that can't be auto-derived — it maps sheet column names
+// to whether they're single-select or multi-select.
+// Add entries here as you add new quiz questions with sheet responses.
+const SHEET_COLUMNS = {
+  gender:          'single',
+  age:             'single',
+  goals:           'multi',
+  smoking_history: 'single',
+  quit_attempts:   'single',
+  methods_tried:   'multi',
+  triggers:        'multi',
+  hardest_part:    'single',
+  life_impact:     'multi',
+  monthly_spend:   'single',
+  motivation:      'single',
+};
+
+// Friendly labels for raw values in drill-down charts
 const VALUE_LABELS = {
   gender:          { Male: 'Male', Female: 'Female' },
   age:             { '25–34':'25–34','35–44':'35–44','45–54':'45–54','55–64':'55–64','65+':'65+' },
@@ -309,6 +293,53 @@ const VALUE_LABELS = {
   triggers:        { coffee:'Morning coffee', stress:'Stress', meal:'After meals', driving:'Driving', social:'Social', breaks:'Work breaks', bored:'Boredom' },
   life_impact:     { winded:'Winded', cough:'Cough', healthscare:'Health scare', kids:'Kids/grandkids', partner:'Partner concern', hiding:'Hiding it', control:'Feel controlled', dontthink:'Don\'t think about it' },
 };
+
+function deriveStepMeta(eventName) {
+  // Check for manual override first
+  if (STEP_OVERRIDES[eventName]) {
+    return { ...autoDerive(eventName), ...STEP_OVERRIDES[eventName] };
+  }
+  return autoDerive(eventName);
+}
+
+function autoDerive(eventName) {
+  // Phase: derive from prefix
+  let phase = 'quiz';
+  if (eventName === 'session_start') phase = 'entry';
+  else if (eventName.startsWith('R') && /^R\d/.test(eventName)) phase = 'results';
+
+  // Label: "Q1_gender" → "Q1 — Gender", "R5_cta_click" → "R5 — Cta click"
+  // "session_start" → "Sessions started"
+  let label = eventName;
+  if (eventName === 'session_start') {
+    label = 'Sessions started';
+  } else {
+    const match = eventName.match(/^([QR]\d+)_(.+)$/);
+    if (match) {
+      const prefix = match[1];
+      const rest = match[2].replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      label = prefix + ' — ' + rest;
+    } else {
+      label = eventName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+  }
+
+  // SheetKey: strip the Q/R prefix to get the potential sheet column name
+  // e.g. "Q1_gender" → "gender", "Q6_methods" → "methods"
+  // Then check if that column exists in SHEET_COLUMNS
+  let sheetKey = null;
+  let type = null;
+  const colMatch = eventName.match(/^[QR]\d+_(.+)$/);
+  if (colMatch) {
+    const candidate = colMatch[1];
+    if (SHEET_COLUMNS[candidate]) {
+      sheetKey = candidate;
+      type = SHEET_COLUMNS[candidate];
+    }
+  }
+
+  return { label, phase, sheetKey, type };
+}
 
 const BAR_COLORS = [
   'linear-gradient(90deg,#c8a96e,#e8c98a)',
@@ -344,16 +375,29 @@ function toggleFacebook(btn) {
   facebookOnly = !facebookOnly;
   btn.classList.toggle('active', facebookOnly);
   if (activeDrill) {
-    const meta = STEP_META[activeDrill];
+    const meta = deriveStepMeta(activeDrill);
     if (meta) renderDrill(activeDrill, meta);
   }
-  const _top = currentSteps[0]?.count || 0;
-  const _cta = currentSteps.slice().reverse().find(s=>s.name.includes('cta_click'))?.count || 0;
-  const _r1  = currentSteps.find(s=>(STEP_META[s.name]?.phase||derivePhase(s.name))==='results')?.count || 0;
-  renderObservations(currentSteps, _top,
-    _top > 0 ? Math.round(_cta/_top*100) : 0,
-    _r1  > 0 ? Math.round(_cta/_r1*100)  : 0
+  renderObservations(currentSteps, currentSteps[0]?.count || 0,
+    currentSteps[0]?.count > 0 ? Math.round((currentSteps.find(s=>s.name.includes('cta_click'))?.count||0)/currentSteps[0].count*100) : 0,
+    findFirstResult()?.count > 0 ? Math.round((currentSteps.find(s=>s.name.includes('cta_click'))?.count||0)/findFirstResult().count*100) : 0
   );
+}
+
+// Helper: find first result step dynamically
+function findFirstResult() {
+  return currentSteps.find(s => /^R\d/.test(s.name));
+}
+
+// Helper: find the last step (CTA click or last event)
+function findCtaStep() {
+  // Look for anything with 'cta_click' in the name, otherwise last step
+  return currentSteps.find(s => s.name.includes('cta_click')) || currentSteps[currentSteps.length - 1];
+}
+
+// Helper: find Q1 step dynamically
+function findQ1Step() {
+  return currentSteps.find(s => /^Q1[_]/.test(s.name));
 }
 
 // ── LOAD TABS ────────────────────────────────────────────────────
@@ -370,10 +414,8 @@ async function loadTabs() {
       btn.onclick = () => setVersion(tab, btn);
       container.appendChild(btn);
     });
-    // Set initial version to first tab
     if (tabs.length > 0) activeVersion = tabs[0];
   } catch(e) {
-    // Fallback to defaults if tab discovery fails
     document.getElementById('versionBtns').innerHTML = `
       <button class="version-btn active" onclick="setVersion('quiz1',this)">quiz1</button>
       <button class="version-btn" onclick="setVersion('quiz2',this)">quiz2</button>`;
@@ -403,11 +445,7 @@ async function loadAll() {
     const [funnelData, rawRows] = await Promise.all([funnelRes.json(), sheetRes.json()]);
     if (funnelData.error) throw new Error(funnelData.error);
 
-    currentSteps = rebase(fixSessionBaseline(funnelData.steps));
-    // If specific R*_cta_click events exist, drop the generic cta_click duplicate
-    if (currentSteps.some(s => /^R\d+_cta_click$/i.test(s.name))) {
-      currentSteps = currentSteps.filter(s => s.name !== 'cta_click');
-    }
+    currentSteps = rebase(funnelData.steps);
     sheetRows = Array.isArray(rawRows) ? rawRows : [];
 
     renderAll();
@@ -417,13 +455,6 @@ async function loadAll() {
   } catch(e) {
     showError(e.message);
   }
-}
-
-// ── SESSION FIX ──────────────────────────────────────────────────
-// Strip quiz_start from steps entirely — session_start is the baseline.
-function fixSessionBaseline(steps) {
-  if (!steps || !steps.length) return steps;
-  return steps.filter(s => s.name !== 'quiz_start');
 }
 
 function rebase(steps) {
@@ -440,31 +471,16 @@ function rebase(steps) {
   });
 }
 
-// ── HELPERS ──────────────────────────────────────────────────────
-// Infers phase from event name for events not in STEP_META
-function derivePhase(name) {
-  if (!name) return 'quiz';
-  if (name === 'session_start') return 'entry';
-  if (/^R\d+_/i.test(name) || name.includes('cta_click')) return 'results';
-  return 'quiz';
-}
-
-// Builds a friendly label for any event name not in STEP_META
-function deriveLabel(name) {
-  return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
-
 // ── RENDER ALL ───────────────────────────────────────────────────
 function renderAll() {
   const steps = currentSteps;
   if (!steps.length) return;
 
   const top      = steps[0].count;
-  const q1       = steps.find(s => s.name === 'Q1_gender')?.count || 0;
-  // Dynamically find the first results step and the CTA click — works for any quiz version
-  const firstResultStep = steps.find(s => (STEP_META[s.name]?.phase || derivePhase(s.name)) === 'results');
-  const r1       = firstResultStep?.count || 0;
-  const ctaClick = steps.slice().reverse().find(s => s.name.includes('cta_click'))?.count || 0;
+  const q1       = findQ1Step()?.count || 0;
+  const r1       = findFirstResult()?.count || 0;
+  const ctaStep  = findCtaStep();
+  const ctaClick = ctaStep?.count || 0;
   const completionPct = top > 0 ? Math.round(ctaClick / top * 100) : 0;
   const ctaRate  = r1 > 0 ? Math.round(ctaClick / r1 * 100) : 0;
   const byDrop   = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
@@ -493,7 +509,7 @@ function renderFunnel(steps, top) {
   let html = '', lastPhase = null;
 
   steps.forEach((step, i) => {
-    const meta = STEP_META[step.name] || { label: deriveLabel(step.name), phase: derivePhase(step.name), sheetKey: null };
+    const meta = deriveStepMeta(step.name);
     const hasData = !!meta.sheetKey;
     const widthPct = top > 0 ? (step.count / top * 100) : 0;
     const retColor = step.retentionPct >= 90 ? 'var(--green)' : step.retentionPct >= 70 ? 'var(--accent)' : step.retentionPct >= 50 ? 'var(--yellow)' : 'var(--red)';
@@ -535,7 +551,7 @@ function renderFunnel(steps, top) {
 
 function renderTopDropoffs(items) {
   document.getElementById('topDropoffs').innerHTML = items.map((s, i) => {
-    const meta = STEP_META[s.name] || { label: deriveLabel(s.name) };
+    const meta = deriveStepMeta(s.name);
     return `<div class="dropoff-item">
       <div class="dropoff-rank">${i+1}</div>
       <div class="dropoff-info">
@@ -551,22 +567,23 @@ function renderObservations(steps, top, completionPct, ctaRate) {
   const obs = [];
   const byDrop = [...steps].filter(s => s.dropoff > 0).sort((a,b) => b.dropoffPct - a.dropoffPct);
   const worst = byDrop[0];
-  // Find result steps dynamically — works for R3_reviews (old) or R3_product (new), etc.
-  const resultSteps = steps.filter(s => (STEP_META[s.name]?.phase || derivePhase(s.name)) === 'results');
-  const r3 = resultSteps[2]; // 3rd result page (R3)
-  const r4 = resultSteps[3]; // 4th result page (R4)
-  const q1 = steps.find(s => s.name === 'Q1_gender');
+  const q1 = findQ1Step();
   const sessions = steps[0]?.count || 0;
+
+  // Find last two result steps for R(n-1)→R(n) observation
+  const resultSteps = steps.filter(s => /^R\d/.test(s.name));
+  const secondLast = resultSteps.length >= 2 ? resultSteps[resultSteps.length - 2] : null;
+  const last = resultSteps.length >= 1 ? resultSteps[resultSteps.length - 1] : null;
 
   if (q1 && sessions) {
     const ctr = Math.round(q1.count / sessions * 100);
     const color = ctr >= 75 ? 'var(--green)' : ctr >= 50 ? 'var(--accent)' : 'var(--red)';
     obs.push(`Q1 CTR is <strong style="color:${color}">${ctr}%</strong>${ctr >= 75 ? ' — hitting your 75% target ✓' : ' — below your 75% target'}.`);
   }
-  if (worst) obs.push(`<strong>${STEP_META[worst.name]?.label}</strong> is the biggest single drop at <strong style="color:var(--red)">${worst.dropoffPct}%</strong> — ${worst.dropoff.toLocaleString()} people lost.`);
-  if (r3 && r4) {
-    const drop = Math.round((r3.count - r4.count) / r3.count * 100);
-    if (drop > 3) obs.push(`<strong>R3→R4</strong> loses ${drop}% — reviews page may need stronger CTA.`);
+  if (worst) obs.push(`<strong>${deriveStepMeta(worst.name).label}</strong> is the biggest single drop at <strong style="color:var(--red)">${worst.dropoffPct}%</strong> — ${worst.dropoff.toLocaleString()} people lost.`);
+  if (secondLast && last) {
+    const drop = Math.round((secondLast.count - last.count) / secondLast.count * 100);
+    if (drop > 3) obs.push(`<strong>${deriveStepMeta(secondLast.name).label}→${deriveStepMeta(last.name).label}</strong> loses ${drop}% — may need stronger CTA.`);
   }
   if (completionPct >= 60) obs.push(`<strong style="color:var(--green)">${completionPct}%</strong> session-to-CTA rate is strong.`);
   else if (completionPct < 40) obs.push(`<strong style="color:var(--red)">${completionPct}%</strong> session-to-CTA is below target.`);
@@ -577,7 +594,7 @@ function renderObservations(steps, top, completionPct, ctaRate) {
 
 // ── DRILL DOWN ───────────────────────────────────────────────────
 function drillInto(stepName) {
-  const meta = STEP_META[stepName];
+  const meta = deriveStepMeta(stepName);
   if (!meta?.sheetKey) return;
 
   activeDrill = stepName;
